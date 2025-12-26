@@ -1347,6 +1347,14 @@
       scene5Video.currentTime = 0;
       scene6Video.currentTime = 0;
       
+      // Ensure scrolling is disabled during video playback
+      document.body.classList.add('no-scroll');
+      
+      // Ensure Lenis is initialized
+      if (!lenis) {
+        initLenis();
+      }
+      
       // Switch to the selected scene
       switch(sceneNum) {
         case 1:
@@ -1360,6 +1368,20 @@
             window.scrollTo(0, 0);
           }
           maxScrollReached = 0;
+          
+          // When scene-1 ends, enable scrolling and scroll to canvas-1
+          scene1Video.addEventListener('ended', () => {
+            document.body.classList.remove('no-scroll');
+            scene1Section.style.display = 'none';
+            drawFrame(0);
+            canvas1Section.style.display = 'block';
+            if (lenis) {
+              lenis.scrollTo(canvas1Section.offsetTop, { immediate: true });
+            } else {
+              window.scrollTo(0, canvas1Section.offsetTop);
+            }
+            maxScrollReached = canvas1Section.offsetTop;
+          }, { once: true });
           break;
         case 2:
           scene2Section.style.display = 'flex';
@@ -1370,6 +1392,32 @@
           }
           maxScrollReached = scene2Section.offsetTop;
           scene2Video.play();
+          
+          // When scene-2 ends, play scene-3
+          scene2Video.addEventListener('ended', () => {
+            scene2Section.style.display = 'none';
+            scene3Section.style.display = 'flex';
+            if (lenis) {
+              lenis.scrollTo(scene3Section.offsetTop, { immediate: true });
+            } else {
+              window.scrollTo(0, scene3Section.offsetTop);
+            }
+            scene3Video.play();
+            
+            // When scene-3 ends, enable scrolling and show canvas-2
+            scene3Video.addEventListener('ended', () => {
+              document.body.classList.remove('no-scroll');
+              scene3Section.style.display = 'none';
+              drawFrame2(0);
+              canvas2Section.style.display = 'block';
+              if (lenis) {
+                lenis.scrollTo(canvas2Section.offsetTop, { immediate: true });
+              } else {
+                window.scrollTo(0, canvas2Section.offsetTop);
+              }
+              maxScrollReached = canvas2Section.offsetTop;
+            }, { once: true });
+          }, { once: true });
           break;
         case 3:
           scene3Section.style.display = 'flex';
@@ -1380,6 +1428,20 @@
           }
           maxScrollReached = scene3Section.offsetTop;
           scene3Video.play();
+          
+          // When scene-3 ends, enable scrolling and show canvas-2
+          scene3Video.addEventListener('ended', () => {
+            document.body.classList.remove('no-scroll');
+            scene3Section.style.display = 'none';
+            drawFrame2(0);
+            canvas2Section.style.display = 'block';
+            if (lenis) {
+              lenis.scrollTo(canvas2Section.offsetTop, { immediate: true });
+            } else {
+              window.scrollTo(0, canvas2Section.offsetTop);
+            }
+            maxScrollReached = canvas2Section.offsetTop;
+          }, { once: true });
           break;
         case 4:
           scene4Section.style.display = 'flex';
@@ -1390,6 +1452,20 @@
           }
           maxScrollReached = scene4Section.offsetTop;
           scene4Video.play();
+          
+          // When scene-4 ends, enable scrolling and show canvas-3
+          scene4Video.addEventListener('ended', () => {
+            document.body.classList.remove('no-scroll');
+            scene4Section.style.display = 'none';
+            drawFrame3(0);
+            canvas3Section.style.display = 'block';
+            if (lenis) {
+              lenis.scrollTo(canvas3Section.offsetTop, { immediate: true });
+            } else {
+              window.scrollTo(0, canvas3Section.offsetTop);
+            }
+            maxScrollReached = canvas3Section.offsetTop;
+          }, { once: true });
           break;
         case 5:
           scene5Section.style.display = 'flex';
@@ -1400,6 +1476,20 @@
           }
           maxScrollReached = scene5Section.offsetTop;
           scene5Video.play();
+          
+          // When scene-5 ends, enable scrolling and show canvas-4
+          scene5Video.addEventListener('ended', () => {
+            document.body.classList.remove('no-scroll');
+            scene5Section.style.display = 'none';
+            drawFrame4(0);
+            canvas4Section.style.display = 'block';
+            if (lenis) {
+              lenis.scrollTo(canvas4Section.offsetTop, { immediate: true });
+            } else {
+              window.scrollTo(0, canvas4Section.offsetTop);
+            }
+            maxScrollReached = canvas4Section.offsetTop;
+          }, { once: true });
           break;
         case 6:
           scene6Section.style.display = 'flex';
@@ -1410,6 +1500,20 @@
           }
           maxScrollReached = scene6Section.offsetTop;
           scene6Video.play();
+          
+          // When scene-6 ends, enable scrolling and show canvas-5
+          scene6Video.addEventListener('ended', () => {
+            document.body.classList.remove('no-scroll');
+            scene6Section.style.display = 'none';
+            drawFrame5(0);
+            canvas5Section.style.display = 'block';
+            if (lenis) {
+              lenis.scrollTo(canvas5Section.offsetTop, { immediate: true });
+            } else {
+              window.scrollTo(0, canvas5Section.offsetTop);
+            }
+            maxScrollReached = canvas5Section.offsetTop;
+          }, { once: true });
           break;
       }
       
