@@ -65,8 +65,8 @@
       transition: width 0.1s ease;
     }
 
-    /* Intro Video Section */
-    .intro-section {
+    /* Scene-1 Video Section */
+    .scene-1-section {
       position: relative;
       height: 100vh;
       display: flex;
@@ -76,7 +76,7 @@
       cursor: pointer;
     }
 
-    .intro-video {
+    .scene-1-video {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -132,10 +132,10 @@
       opacity: 0.8;
     }
 
-    /* Canvas section */
-    .canvas-section {
+    /* Canvas-1 section */
+    .canvas-1-section {
       position: relative;
-      height: 500vh;
+      height: 150vh;
     }
 
     .canvas-container {
@@ -153,17 +153,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-    }
-
-    /* Progress bar */
-    .progress-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 3px;
-      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
-      width: 0%;
-      z-index: 100;
     }
 
     /* Scroll hint */
@@ -213,8 +202,8 @@
       50% { transform: rotate(45deg) translateY(6px); }
     }
 
-    /* Outro Video Section */
-    .outro-section {
+    /* Scene-2 Video Section */
+    .scene-2-section {
       position: relative;
       height: 100vh;
       display: none;
@@ -223,7 +212,7 @@
       overflow: hidden;
     }
 
-    .outro-video {
+    .scene-2-video {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -244,19 +233,16 @@
     </div>
   </div>
 
-  <!-- Progress bar -->
-  <div class="progress-bar" id="progress"></div>
-
   <!-- Scroll hint -->
   <div class="scroll-hint" id="scroll-hint">
     <span>Scroll to play</span>
     <div class="arrow"></div>
   </div>
 
-  <!-- Intro Video Section -->
-  <section class="intro-section" id="intro-section">
-    <video class="intro-video" id="intro-video" playsinline preload="auto">
-      <source src="intro.mp4" type="video/mp4">
+  <!-- Scene-1 Video Section -->
+  <section class="scene-1-section" id="scene-1-section">
+    <video class="scene-1-video" id="scene-1-video" playsinline preload="auto">
+      <source src="scene-1.mp4" type="video/mp4">
     </video>
     
     <!-- Tap to play overlay -->
@@ -270,17 +256,17 @@
     </div>
   </section>
 
-  <!-- Canvas Section -->
-  <section class="canvas-section" id="canvas-section">
+  <!-- Canvas-1 Section -->
+  <section class="canvas-1-section" id="canvas-1-section">
     <div class="canvas-container">
       <canvas id="frame-canvas"></canvas>
     </div>
   </section>
 
-  <!-- Outro Video Section -->
-  <section class="outro-section" id="outro-section">
-    <video class="outro-video" id="outro-video" playsinline preload="auto">
-      <source src="outro.mp4" type="video/mp4">
+  <!-- Scene-2 Video Section -->
+  <section class="scene-2-section" id="scene-2-section">
+    <video class="scene-2-video" id="scene-2-video" playsinline preload="auto">
+      <source src="scene-2.mp4" type="video/mp4">
     </video>
   </section>
 
@@ -294,23 +280,23 @@
     }
 
     // Configuration
-    const FRAME_COUNT = 593;
+    const FRAME_COUNT = 28;
     const FRAME_PATH = 'frames/frame_';
-    const FRAME_EXT = '.webp';
+    const FRAME_EXT = '.jpg';
 
     // Elements
     const canvas = document.getElementById('frame-canvas');
     const ctx = canvas.getContext('2d');
-    const canvasSection = document.getElementById('canvas-section');
+    const canvas1Section = document.getElementById('canvas-1-section');
     const progressBar = document.getElementById('progress');
     const scrollHint = document.getElementById('scroll-hint');
     const loader = document.getElementById('loader');
     const loaderFill = document.getElementById('loader-fill');
-    const introSection = document.getElementById('intro-section');
-    const introVideo = document.getElementById('intro-video');
+    const scene1Section = document.getElementById('scene-1-section');
+    const scene1Video = document.getElementById('scene-1-video');
     const tapOverlay = document.getElementById('tap-overlay');
-    const outroSection = document.getElementById('outro-section');
-    const outroVideo = document.getElementById('outro-video');
+    const scene2Section = document.getElementById('scene-2-section');
+    const scene2Video = document.getElementById('scene-2-video');
 
     // Frame storage
     const frames = [];
@@ -318,10 +304,11 @@
     let targetFrame = 0;
     let imagesLoaded = 0;
     let lenis = null;
-    let introPlayed = false;
-    let outroPlayed = false;
+    let scene1Played = false;
+    let scene2Played = false;
     let lastScrollPosition = 0;
     let maxScrollReached = 0;
+    let isCorrectingScroll = false;
 
     // Preload all frames
     function preloadFrames() {
@@ -353,7 +340,7 @@
       });
     }
 
-    // Preload intro and outro videos
+    // Preload scene-1 and scene-2 videos
     function preloadVideos() {
       return new Promise((resolve) => {
         let videosLoaded = 0;
@@ -367,28 +354,28 @@
           }
         }
         
-        // Intro video
-        if (introVideo.readyState >= 3) {
+        // Scene-1 video
+        if (scene1Video.readyState >= 3) {
           checkComplete();
         } else {
-          introVideo.addEventListener('canplaythrough', checkComplete, { once: true });
-          introVideo.addEventListener('error', () => {
-            console.warn('Intro video failed to load');
+          scene1Video.addEventListener('canplaythrough', checkComplete, { once: true });
+          scene1Video.addEventListener('error', () => {
+            console.warn('Scene-1 video failed to load');
             checkComplete();
           }, { once: true });
-          introVideo.load();
+          scene1Video.load();
         }
         
-        // Outro video
-        if (outroVideo.readyState >= 3) {
+        // Scene-2 video
+        if (scene2Video.readyState >= 3) {
           checkComplete();
         } else {
-          outroVideo.addEventListener('canplaythrough', checkComplete, { once: true });
-          outroVideo.addEventListener('error', () => {
-            console.warn('Outro video failed to load');
+          scene2Video.addEventListener('canplaythrough', checkComplete, { once: true });
+          scene2Video.addEventListener('error', () => {
+            console.warn('Scene-2 video failed to load');
             checkComplete();
           }, { once: true });
-          outroVideo.load();
+          scene2Video.load();
         }
       });
     }
@@ -443,24 +430,27 @@
       // Scroll handler
       lenis.on('scroll', ({ scroll, progress: lenisProgress }) => {
         // Disable reverse scroll - only allow forward
-        if (scroll < maxScrollReached) {
+        if (scroll < maxScrollReached && !isCorrectingScroll) {
+          isCorrectingScroll = true;
           lenis.scrollTo(maxScrollReached, { immediate: true });
+          setTimeout(() => {
+            isCorrectingScroll = false;
+          }, 0);
           return;
         }
         maxScrollReached = scroll;
 
-        const sectionTop = canvasSection.offsetTop;
-        const sectionHeight = canvasSection.offsetHeight - window.innerHeight;
+        const sectionTop = canvas1Section.offsetTop;
+        const sectionHeight = canvas1Section.offsetHeight - window.innerHeight;
         
         const scrollInSection = scroll - sectionTop;
         const sectionProgress = Math.max(0, Math.min(1, scrollInSection / sectionHeight));
         
         targetFrame = Math.floor(sectionProgress * (FRAME_COUNT - 1));
-        progressBar.style.width = `${lenisProgress * 100}%`;
         
         // Show/hide scroll hint based on position
-        const introHeight = introSection.offsetHeight;
-        if (scroll > introHeight && scroll < introHeight + window.innerHeight * 0.5) {
+        const scene1Height = scene1Section.offsetHeight;
+        if (scroll > scene1Height && scroll < scene1Height + window.innerHeight * 0.5) {
           scrollHint.classList.add('visible');
           scrollHint.classList.remove('hidden');
         } else {
@@ -468,13 +458,13 @@
           scrollHint.classList.remove('visible');
         }
         
-        // Trigger outro when we reach the last frame
+        // Trigger scene-2 when we reach the last frame
         const isScrollingDown = scroll > lastScrollPosition;
         lastScrollPosition = scroll;
         
-        if (targetFrame >= FRAME_COUNT - 1 && !outroPlayed && isScrollingDown) {
+        if (targetFrame >= FRAME_COUNT - 1 && !scene2Played && isScrollingDown) {
           setTimeout(() => {
-            playOutro();
+            playScene2();
           }, 100);
         }
       });
@@ -482,45 +472,45 @@
       requestAnimationFrame(raf);
     }
 
-    // Handle intro video tap/click
-    function handleIntroTap() {
-      if (introPlayed) return;
-      introPlayed = true;
+    // Handle scene-1 video tap/click
+    function handleScene1Tap() {
+      if (scene1Played) return;
+      scene1Played = true;
       
       // Hide overlay
       tapOverlay.classList.add('hidden');
       
       // Play video
-      introVideo.play();
+      scene1Video.play();
       
-      // iOS FIX: Warm up outro video during user interaction context
-      outroVideo.muted = true;
-      outroVideo.play().then(() => {
-        outroVideo.pause();
-        outroVideo.currentTime = 0;
-        outroVideo.muted = false;
-        console.log('Outro video warmed up for iOS');
+      // iOS FIX: Warm up scene-2 video during user interaction context
+      scene2Video.muted = true;
+      scene2Video.play().then(() => {
+        scene2Video.pause();
+        scene2Video.currentTime = 0;
+        scene2Video.muted = false;
+        console.log('Scene-2 video warmed up for iOS');
       }).catch(e => {
-        console.log('Outro warmup note:', e.message);
+        console.log('Scene-2 warmup note:', e.message);
       });
       
       // When video ends, enable scrolling and scroll to frames
-      introVideo.addEventListener('ended', () => {
+      scene1Video.addEventListener('ended', () => {
         // Enable scrolling immediately
         document.body.classList.remove('no-scroll');
         
         // Initialize Lenis
         initLenis();
         
-        // Hide intro section instantly
-        introSection.style.display = 'none';
+        // Hide scene-1 section instantly
+        scene1Section.style.display = 'none';
         
         // Make sure we're showing the first frame
         drawFrame(0);
         
-        // Scroll to canvas section instantly
-        window.scrollTo(0, canvasSection.offsetTop);
-        maxScrollReached = canvasSection.offsetTop;
+        // Scroll to canvas-1 section instantly
+        window.scrollTo(0, canvas1Section.offsetTop);
+        maxScrollReached = canvas1Section.offsetTop;
         
         // Show scroll hint after a brief delay
         setTimeout(() => {
@@ -529,36 +519,36 @@
       }, { once: true });
     }
 
-    // Play outro video
-    function playOutro() {
-      if (outroPlayed) return;
-      outroPlayed = true;
+    // Play scene-2 video
+    function playScene2() {
+      if (scene2Played) return;
+      scene2Played = true;
       
-      // Disable scrolling during outro
+      // Disable scrolling during scene-2
       document.body.classList.add('no-scroll');
       
-      // Hide canvas section immediately
-      canvasSection.style.display = 'none';
+      // Hide canvas-1 section immediately
+      canvas1Section.style.display = 'none';
       
-      // Show and scroll to outro section
-      outroSection.style.display = 'flex';
-      window.scrollTo(0, outroSection.offsetTop);
+      // Show and scroll to scene-2 section
+      scene2Section.style.display = 'flex';
+      window.scrollTo(0, scene2Section.offsetTop);
       
-      // Play outro video
-      outroVideo.play();
+      // Play scene-2 video
+      scene2Video.play();
       
-      // When outro ends, re-enable scrolling
-      outroVideo.addEventListener('ended', () => {
+      // When scene-2 ends, re-enable scrolling
+      scene2Video.addEventListener('ended', () => {
         document.body.classList.remove('no-scroll');
       }, { once: true });
     }
 
-    // Setup intro interactions
-    function setupIntro() {
-      introSection.addEventListener('click', handleIntroTap);
-      introSection.addEventListener('touchend', (e) => {
+    // Setup scene-1 interactions
+    function setupScene1() {
+      scene1Section.addEventListener('click', handleScene1Tap);
+      scene1Section.addEventListener('touchend', (e) => {
         e.preventDefault();
-        handleIntroTap();
+        handleScene1Tap();
       });
     }
 
@@ -567,26 +557,26 @@
       // Force scroll to top on page load
       window.scrollTo(0, 0);
       
-      // Reset intro section visibility
-      introSection.style.display = 'flex';
-      introSection.style.opacity = '1';
-      introVideo.currentTime = 0;
+      // Reset scene-1 section visibility
+      scene1Section.style.display = 'flex';
+      scene1Section.style.opacity = '1';
+      scene1Video.currentTime = 0;
       tapOverlay.classList.remove('hidden');
-      introPlayed = false;
-      outroPlayed = false;
+      scene1Played = false;
+      scene2Played = false;
       maxScrollReached = 0;
       
-      // Reset canvas and outro sections
-      canvasSection.style.display = 'block';
-      outroSection.style.display = 'none';
-      outroVideo.currentTime = 0;
+      // Reset canvas-1 and scene-2 sections
+      canvas1Section.style.display = 'block';
+      scene2Section.style.display = 'none';
+      scene2Video.currentTime = 0;
       
       // Preload videos first, then frames
       await preloadVideos();
       await preloadFrames();
       
       setupCanvas();
-      setupIntro();
+      setupScene1();
       
       // Hide loader
       loader.classList.add('hidden');
@@ -597,7 +587,5 @@
 
     init();
   </script>
-
-<script src="https://static.app/js/static.js" type="text/javascript"></script>
 </body>
 </html>
