@@ -310,6 +310,61 @@
       }
     }
 
+    .rewind-button {
+      all: unset;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      img {
+        width: 2.5rem;
+        height: 2.5rem;
+      }
+    }
+
+    .home-link {
+      all: unset;
+      position: absolute;
+      bottom: 26%;
+      right: 18%;
+      img {
+        height: 2rem;
+        width: auto;
+      }
+    }
+
+    /* Progress Circle */
+    .progress-circle {
+      position: absolute;
+      bottom: 2rem;
+      right: 6%;
+      width: 2.5rem;
+      height: 2.5rem;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .progress-circle svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .progress-circle .progress-ring {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.3);
+      stroke-width: 2;
+    }
+
+    .progress-circle .progress-fill {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.9);
+      stroke-width: 2;
+      stroke-dasharray: 100.53;
+      stroke-dashoffset: 100.53;
+      transition: stroke-dashoffset 0.1s ease;
+    }
 
     @keyframes scroll-hint-animation {
       from {
@@ -383,6 +438,12 @@
           <span class="text">Scroll</span>
         </div>
       </div>
+      <div class="progress-circle" id="progress-circle-1">
+        <svg viewBox="0 0 36 36">
+          <circle class="progress-ring" cx="18" cy="18" r="16"></circle>
+          <circle class="progress-fill" cx="18" cy="18" r="16"></circle>
+        </svg>
+      </div>
     </div>
   </section>
 
@@ -410,6 +471,12 @@
           <span class="text">Scroll</span>
         </div>
       </div>
+      <div class="progress-circle" id="progress-circle-2">
+        <svg viewBox="0 0 36 36">
+          <circle class="progress-ring" cx="18" cy="18" r="16"></circle>
+          <circle class="progress-fill" cx="18" cy="18" r="16"></circle>
+        </svg>
+      </div>
     </div>
   </section>
 
@@ -429,6 +496,12 @@
           <img src="/icons/scroll.svg" alt="">
           <span class="text">Scroll</span>
         </div>
+      </div>
+      <div class="progress-circle" id="progress-circle-3">
+        <svg viewBox="0 0 36 36">
+          <circle class="progress-ring" cx="18" cy="18" r="16"></circle>
+          <circle class="progress-fill" cx="18" cy="18" r="16"></circle>
+        </svg>
       </div>
     </div>
   </section>
@@ -450,6 +523,12 @@
           <span class="text">Scroll</span>
         </div>
       </div>
+      <div class="progress-circle" id="progress-circle-4">
+        <svg viewBox="0 0 36 36">
+          <circle class="progress-ring" cx="18" cy="18" r="16"></circle>
+          <circle class="progress-fill" cx="18" cy="18" r="16"></circle>
+        </svg>
+      </div>
     </div>
   </section>
 
@@ -464,11 +543,23 @@
   <section class="canvas-5-section" id="canvas-5-section">
     <div class="canvas-container">
       <canvas id="frame-canvas-5"></canvas>
-      <div class="scroll-hint">
+      <div class="scroll-hint" id="canvas-5-scroll-hint">
         <div class="inner">
           <img src="/icons/scroll.svg" alt="">
           <span class="text">Scroll</span>
         </div>
+      </div>
+      <button class="rewind-button" id="rewind-button" style="display: none;">
+         <img src="/icons/rewind.webp" alt="">
+      </button>
+      <a href="https://alea.school" class="home-link" id="home-link" style="display: none;">
+        <img src="/icons/home-logo.webp" alt="">
+      </a>
+      <div class="progress-circle" id="progress-circle-5">
+        <svg viewBox="0 0 36 36">
+          <circle class="progress-ring" cx="18" cy="18" r="16"></circle>
+          <circle class="progress-fill" cx="18" cy="18" r="16"></circle>
+        </svg>
       </div>
     </div>
   </section>
@@ -536,6 +627,14 @@
     const canvas5 = document.getElementById('frame-canvas-5');
     const ctx5 = canvas5.getContext('2d');
     const canvas5Section = document.getElementById('canvas-5-section');
+    const canvas5ScrollHint = document.getElementById('canvas-5-scroll-hint');
+    const rewindButton = document.getElementById('rewind-button');
+    const homeLink = document.getElementById('home-link');
+    const progressCircle1 = document.getElementById('progress-circle-1');
+    const progressCircle2 = document.getElementById('progress-circle-2');
+    const progressCircle3 = document.getElementById('progress-circle-3');
+    const progressCircle4 = document.getElementById('progress-circle-4');
+    const progressCircle5 = document.getElementById('progress-circle-5');
 
     // Frame storage
     const frames = [];
@@ -978,6 +1077,9 @@
           
           targetFrame = Math.floor(sectionProgress * (FRAME_COUNT - 1));
           
+          // Update progress indicator
+          updateCanvasProgress(1, sectionProgress);
+          
           // Trigger scene-2 when we reach the last frame
           const isScrollingDown = scroll > lastScrollPosition;
           
@@ -998,6 +1100,9 @@
           
           targetFrame2 = Math.floor(sectionProgress2 * (FRAME_COUNT_2 - 1));
           
+          // Update progress indicator
+          updateCanvasProgress(2, sectionProgress2);
+          
           // Trigger scene-4 when we reach the last frame of canvas-2
           const isScrollingDown = scroll > lastScrollPosition;
           if (targetFrame2 >= FRAME_COUNT_2 - 1 && !scene4Played && isScrollingDown) {
@@ -1016,6 +1121,9 @@
           const sectionProgress3 = Math.max(0, Math.min(1, scrollInSection3 / sectionHeight3));
           
           targetFrame3 = Math.floor(sectionProgress3 * (FRAME_COUNT_3 - 1));
+          
+          // Update progress indicator
+          updateCanvasProgress(3, sectionProgress3);
           
           // Trigger scene-5 when we reach the last frame of canvas-3
           const isScrollingDown = scroll > lastScrollPosition;
@@ -1036,6 +1144,9 @@
           
           targetFrame4 = Math.floor(sectionProgress4 * (FRAME_COUNT_4 - 1));
           
+          // Update progress indicator
+          updateCanvasProgress(4, sectionProgress4);
+          
           // Trigger scene-6 when we reach the last frame of canvas-4
           const isScrollingDown = scroll > lastScrollPosition;
           if (targetFrame4 >= FRAME_COUNT_4 - 1 && !scene6Played && isScrollingDown) {
@@ -1054,6 +1165,32 @@
           const sectionProgress5 = Math.max(0, Math.min(1, scrollInSection5 / sectionHeight5));
           
           targetFrame5 = Math.floor(sectionProgress5 * (FRAME_COUNT_5 - 1));
+          
+          // Update progress indicator
+          updateCanvasProgress(5, sectionProgress5);
+          
+          // Show rewind button and hide scroll hint at 60% progress
+          if (sectionProgress5 >= 0.6) {
+            if (canvas5ScrollHint) {
+              canvas5ScrollHint.style.display = 'none';
+            }
+            if (rewindButton) {
+              rewindButton.style.display = 'block';
+            }
+            if (homeLink) {
+              homeLink.style.display = 'block';
+            }
+          } else {
+            if (canvas5ScrollHint) {
+              canvas5ScrollHint.style.display = 'block';
+            }
+            if (rewindButton) {
+              rewindButton.style.display = 'none';
+            }
+            if (homeLink) {
+              homeLink.style.display = 'none';
+            }
+          }
         }
         
         // Update last scroll position after all checks
@@ -1297,6 +1434,9 @@
         // Show canvas-5 section
         canvas5Section.style.display = 'block';
         
+        // Reset canvas-5 UI elements
+        resetCanvas5UI();
+        
         // Scroll to canvas-5 section instantly
         window.scrollTo(0, canvas5Section.offsetTop);
         maxScrollReached = canvas5Section.offsetTop;
@@ -1311,6 +1451,33 @@
         e.preventDefault();
         handleScene1Tap();
       });
+    }
+
+    // Update canvas progress indicator
+    function updateCanvasProgress(canvasIndex, progress) {
+      const progressCircles = [progressCircle1, progressCircle2, progressCircle3, progressCircle4, progressCircle5];
+      const circle = progressCircles[canvasIndex - 1];
+      if (!circle) return;
+      
+      const fillElement = circle.querySelector('.progress-fill');
+      if (fillElement) {
+        const circumference = 2 * Math.PI * 16;
+        const offset = circumference - (progress * circumference);
+        fillElement.style.strokeDashoffset = offset;
+      }
+    }
+
+    // Reset canvas-5 UI elements
+    function resetCanvas5UI() {
+      if (canvas5ScrollHint) {
+        canvas5ScrollHint.style.display = 'block';
+      }
+      if (rewindButton) {
+        rewindButton.style.display = 'none';
+      }
+      if (homeLink) {
+        homeLink.style.display = 'none';
+      }
     }
 
     // Menu toggle functionality
@@ -1361,6 +1528,9 @@
       canvas4Section.style.display = 'none';
       canvas5Section.style.display = 'none';
       
+      // Reset canvas-5 UI elements when switching scenes
+      resetCanvas5UI();
+      
       // Stop all videos
       scene1Video.pause();
       scene2Video.pause();
@@ -1376,6 +1546,11 @@
       scene4Video.currentTime = 0;
       scene5Video.currentTime = 0;
       scene6Video.currentTime = 0;
+      
+      // Reset all progress circles
+      for (let i = 1; i <= 5; i++) {
+        updateCanvasProgress(i, 0);
+      }
       
       // Reset all canvas frame variables to start from first frame
       currentFrame = 0;
@@ -1581,6 +1756,10 @@
             targetFrame5 = 0;
             currentFrame5 = 0;
             drawFrame5(0);
+            
+            // Reset canvas-5 UI elements
+            resetCanvas5UI();
+            
             if (lenis) {
               lenis.scrollTo(canvas5Section.offsetTop, { immediate: true });
             } else {
@@ -1609,6 +1788,15 @@
           }
         });
       });
+    }
+
+    // Setup rewind button
+    function setupRewindButton() {
+      if (rewindButton) {
+        rewindButton.addEventListener('click', () => {
+          switchToScene('1');
+        });
+      }
     }
 
     // Initialize
@@ -1659,6 +1847,10 @@
       setupCanvas5();
       setupScene1();
       setupMenuNavigation();
+      setupRewindButton();
+      
+      // Reset canvas-5 UI elements
+      resetCanvas5UI();
       
       // Hide loader
       loader.classList.add('hidden');
