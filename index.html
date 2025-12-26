@@ -218,6 +218,22 @@
       object-fit: cover;
     }
 
+    /* Scene-3 Video Section */
+    .scene-3-section {
+      position: relative;
+      height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .scene-3-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
     /* Disable scroll initially */
     body.no-scroll {
       overflow: hidden;
@@ -270,6 +286,13 @@
     </video>
   </section>
 
+  <!-- Scene-3 Video Section -->
+  <section class="scene-3-section" id="scene-3-section">
+    <video class="scene-3-video" id="scene-3-video" playsinline preload="auto">
+      <source src="scene-3.mp4" type="video/mp4">
+    </video>
+  </section>
+
   <!-- Lenis -->
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
@@ -297,6 +320,8 @@
     const tapOverlay = document.getElementById('tap-overlay');
     const scene2Section = document.getElementById('scene-2-section');
     const scene2Video = document.getElementById('scene-2-video');
+    const scene3Section = document.getElementById('scene-3-section');
+    const scene3Video = document.getElementById('scene-3-video');
 
     // Frame storage
     const frames = [];
@@ -340,11 +365,11 @@
       });
     }
 
-    // Preload scene-1 and scene-2 videos
+    // Preload scene-1, scene-2 and scene-3 videos
     function preloadVideos() {
       return new Promise((resolve) => {
         let videosLoaded = 0;
-        const totalVideos = 2;
+        const totalVideos = 3;
         
         function checkComplete() {
           videosLoaded++;
@@ -376,6 +401,18 @@
             checkComplete();
           }, { once: true });
           scene2Video.load();
+        }
+        
+        // Scene-3 video
+        if (scene3Video.readyState >= 3) {
+          checkComplete();
+        } else {
+          scene3Video.addEventListener('canplaythrough', checkComplete, { once: true });
+          scene3Video.addEventListener('error', () => {
+            console.warn('Scene-3 video failed to load');
+            checkComplete();
+          }, { once: true });
+          scene3Video.load();
         }
       });
     }
@@ -483,7 +520,7 @@
       // Play video
       scene1Video.play();
       
-      // iOS FIX: Warm up scene-2 video during user interaction context
+      // iOS FIX: Warm up scene-2 and scene-3 videos during user interaction context
       scene2Video.muted = true;
       scene2Video.play().then(() => {
         scene2Video.pause();
@@ -492,6 +529,16 @@
         console.log('Scene-2 video warmed up for iOS');
       }).catch(e => {
         console.log('Scene-2 warmup note:', e.message);
+      });
+      
+      scene3Video.muted = true;
+      scene3Video.play().then(() => {
+        scene3Video.pause();
+        scene3Video.currentTime = 0;
+        scene3Video.muted = false;
+        console.log('Scene-3 video warmed up for iOS');
+      }).catch(e => {
+        console.log('Scene-3 warmup note:', e.message);
       });
       
       // When video ends, enable scrolling and scroll to frames
@@ -537,8 +584,26 @@
       // Play scene-2 video
       scene2Video.play();
       
-      // When scene-2 ends, re-enable scrolling
+      // When scene-2 ends, play scene-3 instantly
       scene2Video.addEventListener('ended', () => {
+        playScene3();
+      }, { once: true });
+    }
+
+    // Play scene-3 video
+    function playScene3() {
+      // Hide scene-2 section immediately
+      scene2Section.style.display = 'none';
+      
+      // Show and scroll to scene-3 section
+      scene3Section.style.display = 'flex';
+      window.scrollTo(0, scene3Section.offsetTop);
+      
+      // Play scene-3 video
+      scene3Video.play();
+      
+      // When scene-3 ends, re-enable scrolling
+      scene3Video.addEventListener('ended', () => {
         document.body.classList.remove('no-scroll');
       }, { once: true });
     }
@@ -566,10 +631,12 @@
       scene2Played = false;
       maxScrollReached = 0;
       
-      // Reset canvas-1 and scene-2 sections
+      // Reset canvas-1, scene-2 and scene-3 sections
       canvas1Section.style.display = 'block';
       scene2Section.style.display = 'none';
       scene2Video.currentTime = 0;
+      scene3Section.style.display = 'none';
+      scene3Video.currentTime = 0;
       
       // Preload videos first, then frames
       await preloadVideos();
