@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smooth Scroll Video</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #000;
+      color: #fff;
+    }
+
+    /* Lenis */
+    html.lenis, html.lenis body {
+      height: auto;
+    }
+
+    .lenis.lenis-smooth {
+      scroll-behavior: auto !important;
+    }
+
+    /* Loading screen */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-text {
+      font-size: 18px;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+
+    .loader-bar {
+      width: 200px;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .loader-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+      width: 0%;
+      transition: width 0.1s ease;
+    }
+
+    /* Intro Video Section */
+    .intro-section {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .intro-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Tap to play overlay */
+    .tap-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 10;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    .tap-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .play-button {
+      width: 80px;
+      height: 80px;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .play-button:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .play-button svg {
+      width: 30px;
+      height: 30px;
+      margin-left: 5px;
+      fill: #fff;
+    }
+
+    .tap-text {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      opacity: 0.8;
+    }
+
+    /* Canvas section */
+    .canvas-section {
+      position: relative;
+      height: 500vh;
+    }
+
+    .canvas-container {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #frame-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+      width: 0%;
+      z-index: 100;
+    }
+
+    /* Scroll hint */
+    .scroll-hint {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 50;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .scroll-hint.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-hint.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .scroll-hint span {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.6;
+    }
+
+    .scroll-hint .arrow {
+      width: 20px;
+      height: 20px;
+      border-right: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(45deg);
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50% { transform: rotate(45deg) translateY(6px); }
+    }
+
+    /* Outro Video Section */
+    .outro-section {
+      position: relative;
+      height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .outro-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Disable scroll initially */
+    body.no-scroll {
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="no-scroll">
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="loader-text">Loading...</div>
+    <div class="loader-bar">
+      <div class="loader-fill" id="loader-fill"></div>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-bar" id="progress"></div>
+
+  <!-- Scroll hint -->
+  <div class="scroll-hint" id="scroll-hint">
+    <span>Scroll to play</span>
+    <div class="arrow"></div>
+  </div>
+
+  <!-- Intro Video Section -->
+  <section class="intro-section" id="intro-section">
+    <video class="intro-video" id="intro-video" playsinline preload="auto">
+      <source src="intro.mp4" type="video/mp4">
+    </video>
+    
+    <!-- Tap to play overlay -->
+    <div class="tap-overlay" id="tap-overlay">
+      <div class="play-button">
+        <svg viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </div>
+      <span class="tap-text">Tap to play</span>
+    </div>
+  </section>
+
+  <!-- Canvas Section -->
+  <section class="canvas-section" id="canvas-section">
+    <div class="canvas-container">
+      <canvas id="frame-canvas"></canvas>
+    </div>
+  </section>
+
+  <!-- Outro Video Section -->
+  <section class="outro-section" id="outro-section">
+    <video class="outro-video" id="outro-video" playsinline preload="auto">
+      <source src="outro.mp4" type="video/mp4">
+    </video>
+  </section>
+
+  <!-- Lenis -->
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+
+  <script>
+    // Prevent browser from restoring scroll position on reload
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
+    // Configuration
+    const FRAME_COUNT = 593;
+    const FRAME_PATH = 'frames/frame_';
+    const FRAME_EXT = '.webp';
+
+    // Elements
+    const canvas = document.getElementById('frame-canvas');
+    const ctx = canvas.getContext('2d');
+    const canvasSection = document.getElementById('canvas-section');
+    const progressBar = document.getElementById('progress');
+    const scrollHint = document.getElementById('scroll-hint');
+    const loader = document.getElementById('loader');
+    const loaderFill = document.getElementById('loader-fill');
+    const introSection = document.getElementById('intro-section');
+    const introVideo = document.getElementById('intro-video');
+    const tapOverlay = document.getElementById('tap-overlay');
+    const outroSection = document.getElementById('outro-section');
+    const outroVideo = document.getElementById('outro-video');
+
+    // Frame storage
+    const frames = [];
+    let currentFrame = 0;
+    let targetFrame = 0;
+    let imagesLoaded = 0;
+    let lenis = null;
+    let introPlayed = false;
+    let outroPlayed = false;
+    let lastScrollPosition = 0;
+    let maxScrollReached = 0;
+
+    // Preload all frames
+    function preloadFrames() {
+      return new Promise((resolve) => {
+        for (let i = 1; i <= FRAME_COUNT; i++) {
+          const img = new Image();
+          const frameNum = String(i).padStart(4, '0');
+          img.src = `${FRAME_PATH}${frameNum}${FRAME_EXT}`;
+          
+          img.onload = () => {
+            imagesLoaded++;
+            const frameProgress = (imagesLoaded / FRAME_COUNT) * 90;
+            loaderFill.style.width = `${10 + frameProgress}%`;
+            
+            if (imagesLoaded === FRAME_COUNT) {
+              resolve();
+            }
+          };
+          
+          img.onerror = () => {
+            imagesLoaded++;
+            if (imagesLoaded === FRAME_COUNT) {
+              resolve();
+            }
+          };
+          
+          frames[i - 1] = img;
+        }
+      });
+    }
+
+    // Preload intro and outro videos
+    function preloadVideos() {
+      return new Promise((resolve) => {
+        let videosLoaded = 0;
+        const totalVideos = 2;
+        
+        function checkComplete() {
+          videosLoaded++;
+          if (videosLoaded === totalVideos) {
+            loaderFill.style.width = '10%';
+            resolve();
+          }
+        }
+        
+        // Intro video
+        if (introVideo.readyState >= 3) {
+          checkComplete();
+        } else {
+          introVideo.addEventListener('canplaythrough', checkComplete, { once: true });
+          introVideo.addEventListener('error', () => {
+            console.warn('Intro video failed to load');
+            checkComplete();
+          }, { once: true });
+          introVideo.load();
+        }
+        
+        // Outro video
+        if (outroVideo.readyState >= 3) {
+          checkComplete();
+        } else {
+          outroVideo.addEventListener('canplaythrough', checkComplete, { once: true });
+          outroVideo.addEventListener('error', () => {
+            console.warn('Outro video failed to load');
+            checkComplete();
+          }, { once: true });
+          outroVideo.load();
+        }
+      });
+    }
+
+    // Set canvas size based on first frame
+    function setupCanvas() {
+      const firstFrame = frames[0];
+      if (firstFrame && firstFrame.naturalWidth) {
+        canvas.width = firstFrame.naturalWidth;
+        canvas.height = firstFrame.naturalHeight;
+        drawFrame(0);
+      }
+    }
+
+    // Draw a specific frame
+    function drawFrame(index) {
+      const frame = frames[index];
+      if (frame && frame.complete) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(frame, 0, 0);
+        currentFrame = index;
+      }
+    }
+
+    // Smooth frame interpolation
+    function animate() {
+      const diff = targetFrame - currentFrame;
+      if (Math.abs(diff) > 0.5) {
+        const nextFrame = Math.round(currentFrame + diff * 0.15);
+        if (nextFrame !== currentFrame && nextFrame >= 0 && nextFrame < FRAME_COUNT) {
+          drawFrame(nextFrame);
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    // Initialize Lenis
+    function initLenis() {
+      lenis = new Lenis({
+        duration: 1.0,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        wheelMultiplier: 0.8,
+        touchMultiplier: 1.5,
+      });
+
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+
+      // Scroll handler
+      lenis.on('scroll', ({ scroll, progress: lenisProgress }) => {
+        // Disable reverse scroll - only allow forward
+        if (scroll < maxScrollReached) {
+          lenis.scrollTo(maxScrollReached, { immediate: true });
+          return;
+        }
+        maxScrollReached = scroll;
+
+        const sectionTop = canvasSection.offsetTop;
+        const sectionHeight = canvasSection.offsetHeight - window.innerHeight;
+        
+        const scrollInSection = scroll - sectionTop;
+        const sectionProgress = Math.max(0, Math.min(1, scrollInSection / sectionHeight));
+        
+        targetFrame = Math.floor(sectionProgress * (FRAME_COUNT - 1));
+        progressBar.style.width = `${lenisProgress * 100}%`;
+        
+        // Show/hide scroll hint based on position
+        const introHeight = introSection.offsetHeight;
+        if (scroll > introHeight && scroll < introHeight + window.innerHeight * 0.5) {
+          scrollHint.classList.add('visible');
+          scrollHint.classList.remove('hidden');
+        } else {
+          scrollHint.classList.add('hidden');
+          scrollHint.classList.remove('visible');
+        }
+        
+        // Trigger outro when we reach the last frame
+        const isScrollingDown = scroll > lastScrollPosition;
+        lastScrollPosition = scroll;
+        
+        if (targetFrame >= FRAME_COUNT - 1 && !outroPlayed && isScrollingDown) {
+          setTimeout(() => {
+            playOutro();
+          }, 100);
+        }
+      });
+
+      requestAnimationFrame(raf);
+    }
+
+    // Handle intro video tap/click
+    function handleIntroTap() {
+      if (introPlayed) return;
+      introPlayed = true;
+      
+      // Hide overlay
+      tapOverlay.classList.add('hidden');
+      
+      // Play video
+      introVideo.play();
+      
+      // iOS FIX: Warm up outro video during user interaction context
+      outroVideo.muted = true;
+      outroVideo.play().then(() => {
+        outroVideo.pause();
+        outroVideo.currentTime = 0;
+        outroVideo.muted = false;
+        console.log('Outro video warmed up for iOS');
+      }).catch(e => {
+        console.log('Outro warmup note:', e.message);
+      });
+      
+      // When video ends, enable scrolling and scroll to frames
+      introVideo.addEventListener('ended', () => {
+        // Enable scrolling immediately
+        document.body.classList.remove('no-scroll');
+        
+        // Initialize Lenis
+        initLenis();
+        
+        // Hide intro section instantly
+        introSection.style.display = 'none';
+        
+        // Make sure we're showing the first frame
+        drawFrame(0);
+        
+        // Scroll to canvas section instantly
+        window.scrollTo(0, canvasSection.offsetTop);
+        maxScrollReached = canvasSection.offsetTop;
+        
+        // Show scroll hint after a brief delay
+        setTimeout(() => {
+          scrollHint.classList.add('visible');
+        }, 300);
+      }, { once: true });
+    }
+
+    // Play outro video
+    function playOutro() {
+      if (outroPlayed) return;
+      outroPlayed = true;
+      
+      // Disable scrolling during outro
+      document.body.classList.add('no-scroll');
+      
+      // Hide canvas section immediately
+      canvasSection.style.display = 'none';
+      
+      // Show and scroll to outro section
+      outroSection.style.display = 'flex';
+      window.scrollTo(0, outroSection.offsetTop);
+      
+      // Play outro video
+      outroVideo.play();
+      
+      // When outro ends, re-enable scrolling
+      outroVideo.addEventListener('ended', () => {
+        document.body.classList.remove('no-scroll');
+      }, { once: true });
+    }
+
+    // Setup intro interactions
+    function setupIntro() {
+      introSection.addEventListener('click', handleIntroTap);
+      introSection.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        handleIntroTap();
+      });
+    }
+
+    // Initialize
+    async function init() {
+      // Force scroll to top on page load
+      window.scrollTo(0, 0);
+      
+      // Reset intro section visibility
+      introSection.style.display = 'flex';
+      introSection.style.opacity = '1';
+      introVideo.currentTime = 0;
+      tapOverlay.classList.remove('hidden');
+      introPlayed = false;
+      outroPlayed = false;
+      maxScrollReached = 0;
+      
+      // Reset canvas and outro sections
+      canvasSection.style.display = 'block';
+      outroSection.style.display = 'none';
+      outroVideo.currentTime = 0;
+      
+      // Preload videos first, then frames
+      await preloadVideos();
+      await preloadFrames();
+      
+      setupCanvas();
+      setupIntro();
+      
+      // Hide loader
+      loader.classList.add('hidden');
+      
+      // Start frame animation loop
+      animate();
+    }
+
+    init();
+  </script>
+
+<script src="https://static.app/js/static.js" type="text/javascript"></script>
+</body>
+</html>
