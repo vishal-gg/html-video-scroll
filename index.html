@@ -254,6 +254,63 @@
     }
 
 
+    /* Menu */
+    .menu-wrap {
+      position: fixed;
+      top: 4%;
+      right: 6%;
+      display: flex;
+      flex-direction: column;
+      align-items: end;
+      pointer-events: none;
+      z-index: 99;
+      display: none; /* Hidden by default */
+      
+      .menu-button {
+        all: unset;
+        pointer-events: auto;
+        
+        img {
+          width: 2.5rem;
+          height: 2.5rem;
+          object-fit: contain;
+          transition: transform 0.3s ease;
+          &:active {
+            transform: scale(0.9);
+          }
+        }
+      }
+      
+      .menu-nav {
+        background-color: #ffffff80;
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        clip-path: inset(0% 0% 100% 100%);
+        transition: clip-path 0.3s ease;
+        button {
+          all: unset;
+          display: block;
+          padding: 8px;
+          img {
+            width: 150px;
+            object-fit: contain;
+          }
+          &.active {
+            background-color: #fff;
+          }
+        }
+      }
+
+      &.open {
+        .menu-nav {
+          clip-path: inset(0% 0% 0% 0%);
+          pointer-events: auto;
+        }
+      }
+    }
+
+
     @keyframes scroll-hint-animation {
       from {
         transform: translateY(-5px);
@@ -272,6 +329,33 @@
         <div class="loader-fill" id="loader-fill"></div>
       </div>
     </div>
+  </div>
+
+  <!-- Menu -->
+  <div class="menu-wrap">
+    <button class="menu-button">
+      <img src="/icons/menu.svg" alt="">
+    </button>
+    <nav class="menu-nav">
+      <button data-scene="1" class="active">
+        <img src="/icons/scene-titles/INTRO-BLUE.webp" alt="">
+      </button>
+      <button data-scene="2">
+        <img src="/icons/scene-titles/STUDIO&JAMPSPACE-BLUE.webp" alt="">
+      </button>
+      <button data-scene="3">
+        <img src="/icons/scene-titles/ALEA-ARENA-BLUE.webp" alt="">
+      </button>
+      <button data-scene="4">
+        <img src="/icons/scene-titles/DOJO-BLUE.webp" alt="">
+      </button>
+      <button data-scene="5">
+        <img src="/icons/scene-titles/ATELIER-BLUE.webp" alt="">
+      </button>
+      <button data-scene="6">
+        <img src="/icons/scene-titles/PALM-HOUSE-BLUE.webp" alt="">
+      </button>
+    </nav>
   </div>
 
   <!-- Scene-1 Video Section -->
@@ -987,6 +1071,12 @@
       // Hide overlay
       tapOverlay.classList.add('hidden');
       
+      // Show menu-wrap
+      const menuWrap = document.querySelector('.menu-wrap');
+      if (menuWrap) {
+        menuWrap.style.display = 'flex';
+      }
+      
       // Play video
       scene1Video.play();
       
@@ -1204,6 +1294,150 @@
       });
     }
 
+    // Menu toggle functionality
+    const menuWrap = document.querySelector('.menu-wrap');
+    const menuButton = document.querySelector('.menu-button');
+    
+    if (menuButton) {
+      menuButton.addEventListener('click', () => {
+        menuWrap.classList.toggle('open');
+      });
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (menuWrap && !menuWrap.contains(e.target)) {
+        menuWrap.classList.remove('open');
+      }
+    });
+
+    // Scene switching functionality
+    function switchToScene(sceneId) {
+      const sceneNum = parseInt(sceneId);
+      
+      // Close menu
+      menuWrap.classList.remove('open');
+      
+      // Hide all sections first
+      scene1Section.style.display = 'none';
+      scene2Section.style.display = 'none';
+      scene3Section.style.display = 'none';
+      scene4Section.style.display = 'none';
+      scene5Section.style.display = 'none';
+      scene6Section.style.display = 'none';
+      canvas1Section.style.display = 'none';
+      canvas2Section.style.display = 'none';
+      canvas3Section.style.display = 'none';
+      canvas4Section.style.display = 'none';
+      canvas5Section.style.display = 'none';
+      
+      // Stop all videos
+      scene1Video.pause();
+      scene2Video.pause();
+      scene3Video.pause();
+      scene4Video.pause();
+      scene5Video.pause();
+      scene6Video.pause();
+      
+      // Reset video times
+      scene1Video.currentTime = 0;
+      scene2Video.currentTime = 0;
+      scene3Video.currentTime = 0;
+      scene4Video.currentTime = 0;
+      scene5Video.currentTime = 0;
+      scene6Video.currentTime = 0;
+      
+      // Switch to the selected scene
+      switch(sceneNum) {
+        case 1:
+          scene1Section.style.display = 'flex';
+          tapOverlay.classList.add('hidden');
+          scene1Video.currentTime = 0;
+          scene1Video.play();
+          if (lenis) {
+            lenis.scrollTo(0, { immediate: true });
+          } else {
+            window.scrollTo(0, 0);
+          }
+          maxScrollReached = 0;
+          break;
+        case 2:
+          scene2Section.style.display = 'flex';
+          if (lenis) {
+            lenis.scrollTo(scene2Section.offsetTop, { immediate: true });
+          } else {
+            window.scrollTo(0, scene2Section.offsetTop);
+          }
+          maxScrollReached = scene2Section.offsetTop;
+          scene2Video.play();
+          break;
+        case 3:
+          scene3Section.style.display = 'flex';
+          if (lenis) {
+            lenis.scrollTo(scene3Section.offsetTop, { immediate: true });
+          } else {
+            window.scrollTo(0, scene3Section.offsetTop);
+          }
+          maxScrollReached = scene3Section.offsetTop;
+          scene3Video.play();
+          break;
+        case 4:
+          scene4Section.style.display = 'flex';
+          if (lenis) {
+            lenis.scrollTo(scene4Section.offsetTop, { immediate: true });
+          } else {
+            window.scrollTo(0, scene4Section.offsetTop);
+          }
+          maxScrollReached = scene4Section.offsetTop;
+          scene4Video.play();
+          break;
+        case 5:
+          scene5Section.style.display = 'flex';
+          if (lenis) {
+            lenis.scrollTo(scene5Section.offsetTop, { immediate: true });
+          } else {
+            window.scrollTo(0, scene5Section.offsetTop);
+          }
+          maxScrollReached = scene5Section.offsetTop;
+          scene5Video.play();
+          break;
+        case 6:
+          scene6Section.style.display = 'flex';
+          if (lenis) {
+            lenis.scrollTo(scene6Section.offsetTop, { immediate: true });
+          } else {
+            window.scrollTo(0, scene6Section.offsetTop);
+          }
+          maxScrollReached = scene6Section.offsetTop;
+          scene6Video.play();
+          break;
+      }
+      
+      // Update active button in menu
+      const sceneButtons = document.querySelectorAll('.menu-nav button[data-scene]');
+      sceneButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.getAttribute('data-scene')) === sceneNum) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    // Setup scene navigation buttons
+    function setupMenuNavigation() {
+      const sceneButtons = document.querySelectorAll('.menu-nav button[data-scene]');
+      sceneButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const sceneId = button.getAttribute('data-scene');
+          if (sceneId) {
+            switchToScene(sceneId);
+          }
+        });
+      });
+    }
+
     // Initialize
     async function init() {
       // Force scroll to top on page load
@@ -1251,6 +1485,7 @@
       setupCanvas4();
       setupCanvas5();
       setupScene1();
+      setupMenuNavigation();
       
       // Hide loader
       loader.classList.add('hidden');
