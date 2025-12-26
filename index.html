@@ -138,6 +138,12 @@
       height: 150vh;
     }
 
+    /* Canvas-2 section */
+    .canvas-2-section {
+      position: relative;
+      height: 300vh;
+    }
+
     .canvas-container {
       position: sticky;
       top: 0;
@@ -150,6 +156,12 @@
     }
 
     #frame-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #frame-canvas-2 {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -293,6 +305,13 @@
     </video>
   </section>
 
+  <!-- Canvas-2 Section -->
+  <section class="canvas-2-section" id="canvas-2-section">
+    <div class="canvas-container">
+      <canvas id="frame-canvas-2"></canvas>
+    </div>
+  </section>
+
   <!-- Lenis -->
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
@@ -306,11 +325,18 @@
     const FRAME_COUNT = 28;
     const FRAME_PATH = 'frames/frame_';
     const FRAME_EXT = '.jpg';
+    
+    const FRAME_COUNT_2 = 593;
+    const FRAME_PATH_2 = 'frames-2/frame_';
+    const FRAME_EXT_2 = '.webp';
 
     // Elements
     const canvas = document.getElementById('frame-canvas');
     const ctx = canvas.getContext('2d');
     const canvas1Section = document.getElementById('canvas-1-section');
+    const canvas2 = document.getElementById('frame-canvas-2');
+    const ctx2 = canvas2.getContext('2d');
+    const canvas2Section = document.getElementById('canvas-2-section');
     const progressBar = document.getElementById('progress');
     const scrollHint = document.getElementById('scroll-hint');
     const loader = document.getElementById('loader');
@@ -328,6 +354,12 @@
     let currentFrame = 0;
     let targetFrame = 0;
     let imagesLoaded = 0;
+    
+    const frames2 = [];
+    let currentFrame2 = 0;
+    let targetFrame2 = 0;
+    let imagesLoaded2 = 0;
+    
     let lenis = null;
     let scene1Played = false;
     let scene2Played = false;
@@ -345,7 +377,7 @@
           
           img.onload = () => {
             imagesLoaded++;
-            const frameProgress = (imagesLoaded / FRAME_COUNT) * 90;
+            const frameProgress = (imagesLoaded / FRAME_COUNT) * 45;
             loaderFill.style.width = `${10 + frameProgress}%`;
             
             if (imagesLoaded === FRAME_COUNT) {
@@ -361,6 +393,37 @@
           };
           
           frames[i - 1] = img;
+        }
+      });
+    }
+
+    // Preload all frames for canvas-2
+    function preloadFrames2() {
+      return new Promise((resolve) => {
+        for (let i = 1; i <= FRAME_COUNT_2; i++) {
+          const img = new Image();
+          const frameNum = String(i).padStart(4, '0');
+          img.src = `${FRAME_PATH_2}${frameNum}${FRAME_EXT_2}`;
+          
+          img.onload = () => {
+            imagesLoaded2++;
+            const frameProgress = (imagesLoaded2 / FRAME_COUNT_2) * 45;
+            const currentProgress = 10 + (imagesLoaded / FRAME_COUNT) * 45;
+            loaderFill.style.width = `${currentProgress + frameProgress}%`;
+            
+            if (imagesLoaded2 === FRAME_COUNT_2) {
+              resolve();
+            }
+          };
+          
+          img.onerror = () => {
+            imagesLoaded2++;
+            if (imagesLoaded2 === FRAME_COUNT_2) {
+              resolve();
+            }
+          };
+          
+          frames2[i - 1] = img;
         }
       });
     }
@@ -427,6 +490,16 @@
       }
     }
 
+    // Set canvas-2 size based on first frame
+    function setupCanvas2() {
+      const firstFrame = frames2[0];
+      if (firstFrame && firstFrame.naturalWidth) {
+        canvas2.width = firstFrame.naturalWidth;
+        canvas2.height = firstFrame.naturalHeight;
+        drawFrame2(0);
+      }
+    }
+
     // Draw a specific frame
     function drawFrame(index) {
       const frame = frames[index];
@@ -434,6 +507,16 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(frame, 0, 0);
         currentFrame = index;
+      }
+    }
+
+    // Draw a specific frame for canvas-2
+    function drawFrame2(index) {
+      const frame = frames2[index];
+      if (frame && frame.complete) {
+        ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+        ctx2.drawImage(frame, 0, 0);
+        currentFrame2 = index;
       }
     }
 
@@ -447,6 +530,18 @@
         }
       }
       requestAnimationFrame(animate);
+    }
+
+    // Smooth frame interpolation for canvas-2
+    function animate2() {
+      const diff = targetFrame2 - currentFrame2;
+      if (Math.abs(diff) > 0.5) {
+        const nextFrame = Math.round(currentFrame2 + diff * 0.15);
+        if (nextFrame !== currentFrame2 && nextFrame >= 0 && nextFrame < FRAME_COUNT_2) {
+          drawFrame2(nextFrame);
+        }
+      }
+      requestAnimationFrame(animate2);
     }
 
     // Initialize Lenis
@@ -477,32 +572,46 @@
         }
         maxScrollReached = scroll;
 
-        const sectionTop = canvas1Section.offsetTop;
-        const sectionHeight = canvas1Section.offsetHeight - window.innerHeight;
-        
-        const scrollInSection = scroll - sectionTop;
-        const sectionProgress = Math.max(0, Math.min(1, scrollInSection / sectionHeight));
-        
-        targetFrame = Math.floor(sectionProgress * (FRAME_COUNT - 1));
-        
-        // Show/hide scroll hint based on position
-        const scene1Height = scene1Section.offsetHeight;
-        if (scroll > scene1Height && scroll < scene1Height + window.innerHeight * 0.5) {
-          scrollHint.classList.add('visible');
-          scrollHint.classList.remove('hidden');
-        } else {
-          scrollHint.classList.add('hidden');
-          scrollHint.classList.remove('visible');
+        // Handle canvas-1 scrolling
+        if (canvas1Section.offsetParent !== null) {
+          const sectionTop = canvas1Section.offsetTop;
+          const sectionHeight = canvas1Section.offsetHeight - window.innerHeight;
+          
+          const scrollInSection = scroll - sectionTop;
+          const sectionProgress = Math.max(0, Math.min(1, scrollInSection / sectionHeight));
+          
+          targetFrame = Math.floor(sectionProgress * (FRAME_COUNT - 1));
+          
+          // Show/hide scroll hint based on position
+          const scene1Height = scene1Section.offsetHeight;
+          if (scroll > scene1Height && scroll < scene1Height + window.innerHeight * 0.5) {
+            scrollHint.classList.add('visible');
+            scrollHint.classList.remove('hidden');
+          } else {
+            scrollHint.classList.add('hidden');
+            scrollHint.classList.remove('visible');
+          }
+          
+          // Trigger scene-2 when we reach the last frame
+          const isScrollingDown = scroll > lastScrollPosition;
+          lastScrollPosition = scroll;
+          
+          if (targetFrame >= FRAME_COUNT - 1 && !scene2Played && isScrollingDown) {
+            setTimeout(() => {
+              playScene2();
+            }, 100);
+          }
         }
-        
-        // Trigger scene-2 when we reach the last frame
-        const isScrollingDown = scroll > lastScrollPosition;
-        lastScrollPosition = scroll;
-        
-        if (targetFrame >= FRAME_COUNT - 1 && !scene2Played && isScrollingDown) {
-          setTimeout(() => {
-            playScene2();
-          }, 100);
+
+        // Handle canvas-2 scrolling
+        if (canvas2Section.offsetParent !== null) {
+          const sectionTop2 = canvas2Section.offsetTop;
+          const sectionHeight2 = canvas2Section.offsetHeight - window.innerHeight;
+          
+          const scrollInSection2 = scroll - sectionTop2;
+          const sectionProgress2 = Math.max(0, Math.min(1, scrollInSection2 / sectionHeight2));
+          
+          targetFrame2 = Math.floor(sectionProgress2 * (FRAME_COUNT_2 - 1));
         }
       });
 
@@ -602,9 +711,23 @@
       // Play scene-3 video
       scene3Video.play();
       
-      // When scene-3 ends, re-enable scrolling
+      // When scene-3 ends, enable scrolling and show canvas-2
       scene3Video.addEventListener('ended', () => {
+        // Enable scrolling immediately
         document.body.classList.remove('no-scroll');
+        
+        // Hide scene-3 section instantly
+        scene3Section.style.display = 'none';
+        
+        // Make sure we're showing the first frame of canvas-2
+        drawFrame2(0);
+        
+        // Show canvas-2 section
+        canvas2Section.style.display = 'block';
+        
+        // Scroll to canvas-2 section instantly
+        window.scrollTo(0, canvas2Section.offsetTop);
+        maxScrollReached = canvas2Section.offsetTop;
       }, { once: true });
     }
 
@@ -631,8 +754,9 @@
       scene2Played = false;
       maxScrollReached = 0;
       
-      // Reset canvas-1, scene-2 and scene-3 sections
+      // Reset canvas-1, canvas-2, scene-2 and scene-3 sections
       canvas1Section.style.display = 'block';
+      canvas2Section.style.display = 'none';
       scene2Section.style.display = 'none';
       scene2Video.currentTime = 0;
       scene3Section.style.display = 'none';
@@ -640,16 +764,18 @@
       
       // Preload videos first, then frames
       await preloadVideos();
-      await preloadFrames();
+      await Promise.all([preloadFrames(), preloadFrames2()]);
       
       setupCanvas();
+      setupCanvas2();
       setupScene1();
       
       // Hide loader
       loader.classList.add('hidden');
       
-      // Start frame animation loop
+      // Start frame animation loops
       animate();
+      animate2();
     }
 
     init();
