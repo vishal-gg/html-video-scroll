@@ -179,6 +179,37 @@
       object-fit: cover;
     }
 
+    .scroll-hint {
+      position: absolute;
+      inset: 0;
+
+      .inner {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        height: 100svh;
+        justify-content: end;
+        align-items: center;
+        padding-bottom: 2rem;
+        
+        img, svg {
+          display: block;
+          width: 2.5rem;
+          height: 2.5rem;
+          object-fit: contain;
+          animation: scroll-hint-animation 1s ease-in-out infinite alternate;
+        }
+
+        .text {
+          font-size: 12px;
+          text-transform: uppercase;
+          font-weight: bold;
+          text-shadow: 2px 2px #000;
+          letter-spacing: 1px;
+        }
+      }
+    }
+
     /* Scene-2 Video Section */
     .scene-2-section {
       position: relative;
@@ -221,6 +252,15 @@
     body.no-scroll {
       overflow: hidden;
     }
+
+
+    @keyframes scroll-hint-animation {
+      from {
+        transform: translateY(-5px);
+      } to {
+        transform: translateY(5px);
+      }
+    }
   </style>
 </head>
 <body class="no-scroll">
@@ -253,6 +293,12 @@
   <section class="canvas-1-section" id="canvas-1-section">
     <div class="canvas-container">
       <canvas id="frame-canvas"></canvas>
+      <div class="scroll-hint">
+        <div class="inner">
+          <img src="/icons/scroll.svg" alt="">
+          <span class="text">Scroll</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -274,6 +320,12 @@
   <section class="canvas-2-section" id="canvas-2-section">
     <div class="canvas-container">
       <canvas id="frame-canvas-2"></canvas>
+      <div class="scroll-hint">
+        <div class="inner">
+          <img src="/icons/scroll.svg" alt="">
+          <span class="text">Scroll</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -288,6 +340,12 @@
   <section class="canvas-3-section" id="canvas-3-section">
     <div class="canvas-container">
       <canvas id="frame-canvas-3"></canvas>
+      <div class="scroll-hint">
+        <div class="inner">
+          <img src="/icons/scroll.svg" alt="">
+          <span class="text">Scroll</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -302,6 +360,12 @@
   <section class="canvas-4-section" id="canvas-4-section">
     <div class="canvas-container">
       <canvas id="frame-canvas-4"></canvas>
+      <div class="scroll-hint">
+        <div class="inner">
+          <img src="/icons/scroll.svg" alt="">
+          <span class="text">Scroll</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -316,6 +380,12 @@
   <section class="canvas-5-section" id="canvas-5-section">
     <div class="canvas-container">
       <canvas id="frame-canvas-5"></canvas>
+      <div class="scroll-hint">
+        <div class="inner">
+          <img src="/icons/scroll.svg" alt="">
+          <span class="text">Scroll</span>
+        </div>
+      </div>
     </div>
   </section>
 
