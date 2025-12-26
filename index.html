@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smooth Scroll Video</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
     * {
       margin: 0;
       padding: 0;
@@ -12,7 +13,7 @@
     }
 
     html, body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: Roboto, -apple-system, sans-serif;
       background: #000;
       color: #fff;
     }
@@ -30,37 +31,42 @@
     .loader {
       position: fixed;
       inset: 0;
-      background: #000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      --blur-amount: 50px;
+      backdrop-filter: blur(var(--blur-amount));
       z-index: 1000;
       transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loader-inner {
+      height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      justify-content: end;
     }
 
     .loader.hidden {
       opacity: 0;
       visibility: hidden;
+      --blur-amount: 0px;
     }
 
     .loader-text {
-      font-size: 18px;
-      margin-bottom: 20px;
-      opacity: 0.8;
+      font-size: clamp(4rem, (5vw + 2rem), 10rem);
+      font-weight: bold;
+      padding-left: 0.2em;
     }
 
     .loader-bar {
-      width: 200px;
-      height: 4px;
+      width: 100%;
+      height: 1rem;
       background: rgba(255,255,255,0.2);
-      border-radius: 2px;
       overflow: hidden;
     }
 
     .loader-fill {
       height: 100%;
-      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+      background: linear-gradient(90deg, white);
       width: 0%;
       transition: width 0.1s ease;
     }
@@ -90,7 +96,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.4);
+      /* background: rgba(0, 0, 0, 0.4); */
       z-index: 10;
       transition: opacity 0.4s ease, visibility 0.4s ease;
     }
@@ -262,9 +268,11 @@
 <body class="no-scroll">
   <!-- Loader -->
   <div class="loader" id="loader">
-    <div class="loader-text">Loading...</div>
-    <div class="loader-bar">
-      <div class="loader-fill" id="loader-fill"></div>
+    <div class="loader-inner">
+      <div class="loader-text" id="loader-percentage">0%</div>
+      <div class="loader-bar">
+        <div class="loader-fill" id="loader-fill"></div>
+      </div>
     </div>
   </div>
 
@@ -402,6 +410,7 @@
     const scrollHint = document.getElementById('scroll-hint');
     const loader = document.getElementById('loader');
     const loaderFill = document.getElementById('loader-fill');
+    const loaderPercentage = document.getElementById("loader-percentage");
     const scene1Section = document.getElementById('scene-1-section');
     const scene1Video = document.getElementById('scene-1-video');
     const tapOverlay = document.getElementById('tap-overlay');
@@ -490,12 +499,25 @@
       });
     }
 
+    // Track last blur update to throttle for smooth transitions
+    let lastBlurProgress = -1;
+    
     // Update loader progress
     function updateLoaderProgress() {
       const totalFrames = FRAME_COUNT + FRAME_COUNT_2 + FRAME_COUNT_3 + FRAME_COUNT_4 + FRAME_COUNT_5;
       const loadedFrames = imagesLoaded + imagesLoaded2 + imagesLoaded3 + imagesLoaded4 + imagesLoaded5;
       const frameProgress = (loadedFrames / totalFrames) * 90;
-      loaderFill.style.width = `${10 + frameProgress}%`;
+      const totalProgress = 10 + frameProgress;
+      loaderFill.style.width = `${totalProgress}%`;
+      loaderPercentage.textContent = `${Math.round(totalProgress)}%`;
+      
+      // Update blur only when progress changes by at least 0.1% for smoother transitions
+      const roundedProgress = Math.round(totalProgress * 2) / 2;
+      if (Math.abs(roundedProgress - lastBlurProgress) >= 0.1 || lastBlurProgress === -1) {
+        const blurAmount = 50 * (1 - totalProgress / 100);
+        loader.style.setProperty('--blur-amount', `${blurAmount}px`);
+        lastBlurProgress = roundedProgress;
+      }
     }
 
     // Preload all frames for canvas-2
@@ -624,6 +646,9 @@
           videosLoaded++;
           if (videosLoaded === totalVideos) {
             loaderFill.style.width = '10%';
+            loaderPercentage.textContent = '10%';
+            // Set initial blur at 10% progress (45px blur remaining)
+            loader.style.setProperty('--blur-amount', '45px');
             resolve();
           }
         }
