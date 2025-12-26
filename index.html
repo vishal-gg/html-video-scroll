@@ -108,15 +108,19 @@
     }
 
     .play-button {
-      width: 80px;
-      height: 80px;
-      border: 3px solid #fff;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       transition: transform 0.3s ease, background 0.3s ease;
+
+      img, svg {
+        display: block;
+        width: 2.5rem;
+        height: 2.5rem;
+        object-fit: contain;
+      }
     }
 
     .play-button:hover {
@@ -132,10 +136,11 @@
     }
 
     .tap-text {
-      font-size: 14px;
+      font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 3px;
-      opacity: 0.8;
+      font-weight: bold;
+      text-shadow: 2px 2px #000;
+      letter-spacing: 1px;
     }
 
     /* Canvas-1 section */
@@ -291,9 +296,7 @@
     <!-- Tap to play overlay -->
     <div class="tap-overlay" id="tap-overlay">
       <div class="play-button">
-        <svg viewBox="0 0 24 24">
-          <path d="M8 5v14l11-7z"/>
-        </svg>
+        <img src="/icons/play.svg" alt="">
       </div>
       <span class="tap-text">Tap to play</span>
     </div>
