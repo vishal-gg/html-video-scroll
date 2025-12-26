@@ -179,53 +179,6 @@
       object-fit: cover;
     }
 
-    /* Scroll hint */
-    .scroll-hint {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      z-index: 50;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-
-    .scroll-hint.visible {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .scroll-hint.hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
-
-    .scroll-hint span {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      opacity: 0.6;
-    }
-
-    .scroll-hint .arrow {
-      width: 20px;
-      height: 20px;
-      border-right: 2px solid #fff;
-      border-bottom: 2px solid #fff;
-      transform: rotate(45deg);
-      animation: bounce 1.5s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: rotate(45deg) translateY(0); }
-      50% { transform: rotate(45deg) translateY(6px); }
-    }
-
     /* Scene-2 Video Section */
     .scene-2-section {
       position: relative;
@@ -279,12 +232,6 @@
         <div class="loader-fill" id="loader-fill"></div>
       </div>
     </div>
-  </div>
-
-  <!-- Scroll hint -->
-  <div class="scroll-hint" id="scroll-hint">
-    <span>Scroll to play</span>
-    <div class="arrow"></div>
   </div>
 
   <!-- Scene-1 Video Section -->
@@ -410,7 +357,6 @@
     const ctx2 = canvas2.getContext('2d');
     const canvas2Section = document.getElementById('canvas-2-section');
     const progressBar = document.getElementById('progress');
-    const scrollHint = document.getElementById('scroll-hint');
     const loader = document.getElementById('loader');
     const loaderFill = document.getElementById('loader-fill');
     const loaderPercentage = document.getElementById("loader-percentage");
@@ -878,16 +824,6 @@
           
           targetFrame = Math.floor(sectionProgress * (FRAME_COUNT - 1));
           
-          // Show/hide scroll hint based on position
-          const scene1Height = scene1Section.offsetHeight;
-          if (scroll > scene1Height && scroll < scene1Height + window.innerHeight * 0.5) {
-            scrollHint.classList.add('visible');
-            scrollHint.classList.remove('hidden');
-          } else {
-            scrollHint.classList.add('hidden');
-            scrollHint.classList.remove('visible');
-          }
-          
           // Trigger scene-2 when we reach the last frame
           const isScrollingDown = scroll > lastScrollPosition;
           
@@ -1015,11 +951,7 @@
         // Scroll to canvas-1 section instantly
         window.scrollTo(0, canvas1Section.offsetTop);
         maxScrollReached = canvas1Section.offsetTop;
-        
-        // Show scroll hint after a brief delay
-        setTimeout(() => {
-          scrollHint.classList.add('visible');
-        }, 300);
+      
       }, { once: true });
     }
 
