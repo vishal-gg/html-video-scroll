@@ -1130,6 +1130,9 @@
       scene2Section.style.display = 'flex';
       window.scrollTo(0, scene2Section.offsetTop);
       
+      // Update active menu button
+      updateActiveMenuButton(2);
+      
       // Play scene-2 video
       scene2Video.play();
       
@@ -1147,6 +1150,9 @@
       // Show and scroll to scene-3 section
       scene3Section.style.display = 'flex';
       window.scrollTo(0, scene3Section.offsetTop);
+      
+      // Update active menu button
+      updateActiveMenuButton(3);
       
       // Play scene-3 video
       scene3Video.play();
@@ -1168,6 +1174,7 @@
         // Scroll to canvas-2 section instantly
         window.scrollTo(0, canvas2Section.offsetTop);
         maxScrollReached = canvas2Section.offsetTop;
+        updateActiveMenuButton(3);
       }, { once: true });
     }
 
@@ -1185,6 +1192,9 @@
       // Show and scroll to scene-4 section
       scene4Section.style.display = 'flex';
       window.scrollTo(0, scene4Section.offsetTop);
+      
+      // Update active menu button
+      updateActiveMenuButton(4);
       
       // Play scene-4 video
       scene4Video.play();
@@ -1206,6 +1216,7 @@
         // Scroll to canvas-3 section instantly
         window.scrollTo(0, canvas3Section.offsetTop);
         maxScrollReached = canvas3Section.offsetTop;
+        updateActiveMenuButton(4);
       }, { once: true });
     }
 
@@ -1223,6 +1234,9 @@
       // Show and scroll to scene-5 section
       scene5Section.style.display = 'flex';
       window.scrollTo(0, scene5Section.offsetTop);
+      
+      // Update active menu button
+      updateActiveMenuButton(5);
       
       // Play scene-5 video
       scene5Video.play();
@@ -1244,6 +1258,7 @@
         // Scroll to canvas-4 section instantly
         window.scrollTo(0, canvas4Section.offsetTop);
         maxScrollReached = canvas4Section.offsetTop;
+        updateActiveMenuButton(5);
       }, { once: true });
     }
 
@@ -1261,6 +1276,9 @@
       // Show and scroll to scene-6 section
       scene6Section.style.display = 'flex';
       window.scrollTo(0, scene6Section.offsetTop);
+      
+      // Update active menu button
+      updateActiveMenuButton(6);
       
       // Play scene-6 video
       scene6Video.play();
@@ -1282,6 +1300,7 @@
         // Scroll to canvas-5 section instantly
         window.scrollTo(0, canvas5Section.offsetTop);
         maxScrollReached = canvas5Section.offsetTop;
+        updateActiveMenuButton(6);
       }, { once: true });
     }
 
@@ -1310,6 +1329,17 @@
         menuWrap.classList.remove('open');
       }
     });
+
+    // Helper function to update active menu button
+    function updateActiveMenuButton(sceneNum) {
+      const sceneButtons = document.querySelectorAll('.menu-nav button[data-scene]');
+      sceneButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.getAttribute('data-scene')) === sceneNum) {
+          btn.classList.add('active');
+        }
+      });
+    }
 
     // Scene switching functionality
     function switchToScene(sceneId) {
@@ -1347,13 +1377,32 @@
       scene5Video.currentTime = 0;
       scene6Video.currentTime = 0;
       
-      // Ensure scrolling is disabled during video playback
-      document.body.classList.add('no-scroll');
+      // Reset all canvas frame variables to start from first frame
+      currentFrame = 0;
+      targetFrame = 0;
+      currentFrame2 = 0;
+      targetFrame2 = 0;
+      currentFrame3 = 0;
+      targetFrame3 = 0;
+      currentFrame4 = 0;
+      targetFrame4 = 0;
+      currentFrame5 = 0;
+      targetFrame5 = 0;
+      
+      // Reset scene played flags so next videos can trigger after canvas
+      scene1Played = false;
+      scene2Played = false;
+      scene4Played = false;
+      scene5Played = false;
+      scene6Played = false;
       
       // Ensure Lenis is initialized
       if (!lenis) {
         initLenis();
       }
+      
+      // Disable scrolling during video playback
+      document.body.classList.add('no-scroll');
       
       // Switch to the selected scene
       switch(sceneNum) {
@@ -1362,6 +1411,7 @@
           tapOverlay.classList.add('hidden');
           scene1Video.currentTime = 0;
           scene1Video.play();
+          updateActiveMenuButton(1);
           if (lenis) {
             lenis.scrollTo(0, { immediate: true });
           } else {
@@ -1369,18 +1419,21 @@
           }
           maxScrollReached = 0;
           
-          // When scene-1 ends, enable scrolling and scroll to canvas-1
+          // Setup transition to canvas-1
           scene1Video.addEventListener('ended', () => {
             document.body.classList.remove('no-scroll');
             scene1Section.style.display = 'none';
-            drawFrame(0);
             canvas1Section.style.display = 'block';
+            targetFrame = 0;
+            currentFrame = 0;
+            drawFrame(0);
             if (lenis) {
               lenis.scrollTo(canvas1Section.offsetTop, { immediate: true });
             } else {
               window.scrollTo(0, canvas1Section.offsetTop);
             }
             maxScrollReached = canvas1Section.offsetTop;
+            updateActiveMenuButton(1);
           }, { once: true });
           break;
         case 2:
@@ -1392,8 +1445,9 @@
           }
           maxScrollReached = scene2Section.offsetTop;
           scene2Video.play();
+          updateActiveMenuButton(2);
           
-          // When scene-2 ends, play scene-3
+          // Setup transition to scene-3, then canvas-2
           scene2Video.addEventListener('ended', () => {
             scene2Section.style.display = 'none';
             scene3Section.style.display = 'flex';
@@ -1402,20 +1456,25 @@
             } else {
               window.scrollTo(0, scene3Section.offsetTop);
             }
+            scene3Video.currentTime = 0;
             scene3Video.play();
+            updateActiveMenuButton(3);
             
             // When scene-3 ends, enable scrolling and show canvas-2
             scene3Video.addEventListener('ended', () => {
               document.body.classList.remove('no-scroll');
               scene3Section.style.display = 'none';
-              drawFrame2(0);
               canvas2Section.style.display = 'block';
+              targetFrame2 = 0;
+              currentFrame2 = 0;
+              drawFrame2(0);
               if (lenis) {
                 lenis.scrollTo(canvas2Section.offsetTop, { immediate: true });
               } else {
                 window.scrollTo(0, canvas2Section.offsetTop);
               }
               maxScrollReached = canvas2Section.offsetTop;
+              updateActiveMenuButton(3);
             }, { once: true });
           }, { once: true });
           break;
@@ -1428,19 +1487,23 @@
           }
           maxScrollReached = scene3Section.offsetTop;
           scene3Video.play();
+          updateActiveMenuButton(3);
           
-          // When scene-3 ends, enable scrolling and show canvas-2
+          // Setup transition to canvas-2
           scene3Video.addEventListener('ended', () => {
             document.body.classList.remove('no-scroll');
             scene3Section.style.display = 'none';
-            drawFrame2(0);
             canvas2Section.style.display = 'block';
+            targetFrame2 = 0;
+            currentFrame2 = 0;
+            drawFrame2(0);
             if (lenis) {
               lenis.scrollTo(canvas2Section.offsetTop, { immediate: true });
             } else {
               window.scrollTo(0, canvas2Section.offsetTop);
             }
             maxScrollReached = canvas2Section.offsetTop;
+            updateActiveMenuButton(3);
           }, { once: true });
           break;
         case 4:
@@ -1452,19 +1515,23 @@
           }
           maxScrollReached = scene4Section.offsetTop;
           scene4Video.play();
+          updateActiveMenuButton(4);
           
-          // When scene-4 ends, enable scrolling and show canvas-3
+          // Setup transition to canvas-3
           scene4Video.addEventListener('ended', () => {
             document.body.classList.remove('no-scroll');
             scene4Section.style.display = 'none';
-            drawFrame3(0);
             canvas3Section.style.display = 'block';
+            targetFrame3 = 0;
+            currentFrame3 = 0;
+            drawFrame3(0);
             if (lenis) {
               lenis.scrollTo(canvas3Section.offsetTop, { immediate: true });
             } else {
               window.scrollTo(0, canvas3Section.offsetTop);
             }
             maxScrollReached = canvas3Section.offsetTop;
+            updateActiveMenuButton(4);
           }, { once: true });
           break;
         case 5:
@@ -1476,19 +1543,23 @@
           }
           maxScrollReached = scene5Section.offsetTop;
           scene5Video.play();
+          updateActiveMenuButton(5);
           
-          // When scene-5 ends, enable scrolling and show canvas-4
+          // Setup transition to canvas-4
           scene5Video.addEventListener('ended', () => {
             document.body.classList.remove('no-scroll');
             scene5Section.style.display = 'none';
-            drawFrame4(0);
             canvas4Section.style.display = 'block';
+            targetFrame4 = 0;
+            currentFrame4 = 0;
+            drawFrame4(0);
             if (lenis) {
               lenis.scrollTo(canvas4Section.offsetTop, { immediate: true });
             } else {
               window.scrollTo(0, canvas4Section.offsetTop);
             }
             maxScrollReached = canvas4Section.offsetTop;
+            updateActiveMenuButton(5);
           }, { once: true });
           break;
         case 6:
@@ -1500,31 +1571,29 @@
           }
           maxScrollReached = scene6Section.offsetTop;
           scene6Video.play();
+          updateActiveMenuButton(6);
           
-          // When scene-6 ends, enable scrolling and show canvas-5
+          // Setup transition to canvas-5
           scene6Video.addEventListener('ended', () => {
             document.body.classList.remove('no-scroll');
             scene6Section.style.display = 'none';
-            drawFrame5(0);
             canvas5Section.style.display = 'block';
+            targetFrame5 = 0;
+            currentFrame5 = 0;
+            drawFrame5(0);
             if (lenis) {
               lenis.scrollTo(canvas5Section.offsetTop, { immediate: true });
             } else {
               window.scrollTo(0, canvas5Section.offsetTop);
             }
             maxScrollReached = canvas5Section.offsetTop;
+            updateActiveMenuButton(6);
           }, { once: true });
           break;
       }
       
       // Update active button in menu
-      const sceneButtons = document.querySelectorAll('.menu-nav button[data-scene]');
-      sceneButtons.forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.getAttribute('data-scene')) === sceneNum) {
-          btn.classList.add('active');
-        }
-      });
+      updateActiveMenuButton(sceneNum);
     }
 
     // Setup scene navigation buttons
