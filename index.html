@@ -133,14 +133,17 @@
     }
 
     /* Canvas-1 section */
-    .canvas-1-section {
+    .canvas-1-section,
+    .canvas-2-section,
+    .canvas-3-section,
+    .canvas-4-section,
+    .canvas-5-section {
       position: relative;
       height: 150vh;
     }
 
     /* Canvas-2 section */
     .canvas-2-section {
-      position: relative;
       height: 300vh;
     }
 
@@ -155,13 +158,11 @@
       overflow: hidden;
     }
 
-    #frame-canvas {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    #frame-canvas-2 {
+    #frame-canvas,
+    #frame-canvas-2,
+    #frame-canvas-3,
+    #frame-canvas-4,
+    #frame-canvas-5 {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -231,7 +232,10 @@
     }
 
     /* Scene-3 Video Section */
-    .scene-3-section {
+    .scene-3-section,
+    .scene-4-section,
+    .scene-5-section,
+    .scene-6-section {
       position: relative;
       height: 100vh;
       display: none;
@@ -240,7 +244,10 @@
       overflow: hidden;
     }
 
-    .scene-3-video {
+    .scene-3-video,
+    .scene-4-video,
+    .scene-5-video,
+    .scene-6-video {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -312,6 +319,48 @@
     </div>
   </section>
 
+  <!-- Scene-4 Video Section -->
+  <section class="scene-4-section" id="scene-4-section">
+    <video class="scene-4-video" id="scene-4-video" playsinline preload="auto">
+      <source src="scene-4.mp4" type="video/mp4">
+    </video>
+  </section>
+
+  <!-- Canvas-3 Section -->
+  <section class="canvas-3-section" id="canvas-3-section">
+    <div class="canvas-container">
+      <canvas id="frame-canvas-3"></canvas>
+    </div>
+  </section>
+
+  <!-- Scene-5 Video Section -->
+  <section class="scene-5-section" id="scene-5-section">
+    <video class="scene-5-video" id="scene-5-video" playsinline preload="auto">
+      <source src="scene-5.mp4" type="video/mp4">
+    </video>
+  </section>
+
+  <!-- Canvas-4 Section -->
+  <section class="canvas-4-section" id="canvas-4-section">
+    <div class="canvas-container">
+      <canvas id="frame-canvas-4"></canvas>
+    </div>
+  </section>
+
+  <!-- Scene-6 Video Section -->
+  <section class="scene-6-section" id="scene-6-section">
+    <video class="scene-6-video" id="scene-6-video" playsinline preload="auto">
+      <source src="scene-6.mp4" type="video/mp4">
+    </video>
+  </section>
+
+  <!-- Canvas-5 Section -->
+  <section class="canvas-5-section" id="canvas-5-section">
+    <div class="canvas-container">
+      <canvas id="frame-canvas-5"></canvas>
+    </div>
+  </section>
+
   <!-- Lenis -->
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
@@ -329,6 +378,18 @@
     const FRAME_COUNT_2 = 593;
     const FRAME_PATH_2 = 'frames-2/frame_';
     const FRAME_EXT_2 = '.webp';
+    
+    const FRAME_COUNT_3 = 32;
+    const FRAME_PATH_3 = 'frames-3/frame_';
+    const FRAME_EXT_3 = '.jpg';
+    
+    const FRAME_COUNT_4 = 47;
+    const FRAME_PATH_4 = 'frames-4/frame_';
+    const FRAME_EXT_4 = '.jpg';
+    
+    const FRAME_COUNT_5 = 70;
+    const FRAME_PATH_5 = 'frames-5/frame_';
+    const FRAME_EXT_5 = '.jpg';
 
     // Elements
     const canvas = document.getElementById('frame-canvas');
@@ -348,6 +409,21 @@
     const scene2Video = document.getElementById('scene-2-video');
     const scene3Section = document.getElementById('scene-3-section');
     const scene3Video = document.getElementById('scene-3-video');
+    const scene4Section = document.getElementById('scene-4-section');
+    const scene4Video = document.getElementById('scene-4-video');
+    const scene5Section = document.getElementById('scene-5-section');
+    const scene5Video = document.getElementById('scene-5-video');
+    const scene6Section = document.getElementById('scene-6-section');
+    const scene6Video = document.getElementById('scene-6-video');
+    const canvas3 = document.getElementById('frame-canvas-3');
+    const ctx3 = canvas3.getContext('2d');
+    const canvas3Section = document.getElementById('canvas-3-section');
+    const canvas4 = document.getElementById('frame-canvas-4');
+    const ctx4 = canvas4.getContext('2d');
+    const canvas4Section = document.getElementById('canvas-4-section');
+    const canvas5 = document.getElementById('frame-canvas-5');
+    const ctx5 = canvas5.getContext('2d');
+    const canvas5Section = document.getElementById('canvas-5-section');
 
     // Frame storage
     const frames = [];
@@ -360,9 +436,27 @@
     let targetFrame2 = 0;
     let imagesLoaded2 = 0;
     
+    const frames3 = [];
+    let currentFrame3 = 0;
+    let targetFrame3 = 0;
+    let imagesLoaded3 = 0;
+    
+    const frames4 = [];
+    let currentFrame4 = 0;
+    let targetFrame4 = 0;
+    let imagesLoaded4 = 0;
+    
+    const frames5 = [];
+    let currentFrame5 = 0;
+    let targetFrame5 = 0;
+    let imagesLoaded5 = 0;
+    
     let lenis = null;
     let scene1Played = false;
     let scene2Played = false;
+    let scene4Played = false;
+    let scene5Played = false;
+    let scene6Played = false;
     let lastScrollPosition = 0;
     let maxScrollReached = 0;
     let isCorrectingScroll = false;
@@ -377,8 +471,7 @@
           
           img.onload = () => {
             imagesLoaded++;
-            const frameProgress = (imagesLoaded / FRAME_COUNT) * 45;
-            loaderFill.style.width = `${10 + frameProgress}%`;
+            updateLoaderProgress();
             
             if (imagesLoaded === FRAME_COUNT) {
               resolve();
@@ -397,6 +490,14 @@
       });
     }
 
+    // Update loader progress
+    function updateLoaderProgress() {
+      const totalFrames = FRAME_COUNT + FRAME_COUNT_2 + FRAME_COUNT_3 + FRAME_COUNT_4 + FRAME_COUNT_5;
+      const loadedFrames = imagesLoaded + imagesLoaded2 + imagesLoaded3 + imagesLoaded4 + imagesLoaded5;
+      const frameProgress = (loadedFrames / totalFrames) * 90;
+      loaderFill.style.width = `${10 + frameProgress}%`;
+    }
+
     // Preload all frames for canvas-2
     function preloadFrames2() {
       return new Promise((resolve) => {
@@ -407,10 +508,7 @@
           
           img.onload = () => {
             imagesLoaded2++;
-            const frameProgress = (imagesLoaded2 / FRAME_COUNT_2) * 45;
-            const currentProgress = 10 + (imagesLoaded / FRAME_COUNT) * 45;
-            loaderFill.style.width = `${currentProgress + frameProgress}%`;
-            
+            updateLoaderProgress();
             if (imagesLoaded2 === FRAME_COUNT_2) {
               resolve();
             }
@@ -418,6 +516,7 @@
           
           img.onerror = () => {
             imagesLoaded2++;
+            updateLoaderProgress();
             if (imagesLoaded2 === FRAME_COUNT_2) {
               resolve();
             }
@@ -428,11 +527,98 @@
       });
     }
 
-    // Preload scene-1, scene-2 and scene-3 videos
+    // Preload all frames for canvas-3
+    function preloadFrames3() {
+      return new Promise((resolve) => {
+        for (let i = 1; i <= FRAME_COUNT_3; i++) {
+          const img = new Image();
+          const frameNum = String(i).padStart(4, '0');
+          img.src = `${FRAME_PATH_3}${frameNum}${FRAME_EXT_3}`;
+          
+          img.onload = () => {
+            imagesLoaded3++;
+            updateLoaderProgress();
+            if (imagesLoaded3 === FRAME_COUNT_3) {
+              resolve();
+            }
+          };
+          
+          img.onerror = () => {
+            imagesLoaded3++;
+            updateLoaderProgress();
+            if (imagesLoaded3 === FRAME_COUNT_3) {
+              resolve();
+            }
+          };
+          
+          frames3[i - 1] = img;
+        }
+      });
+    }
+
+    // Preload all frames for canvas-4
+    function preloadFrames4() {
+      return new Promise((resolve) => {
+        for (let i = 1; i <= FRAME_COUNT_4; i++) {
+          const img = new Image();
+          const frameNum = String(i).padStart(4, '0');
+          img.src = `${FRAME_PATH_4}${frameNum}${FRAME_EXT_4}`;
+          
+          img.onload = () => {
+            imagesLoaded4++;
+            updateLoaderProgress();
+            if (imagesLoaded4 === FRAME_COUNT_4) {
+              resolve();
+            }
+          };
+          
+          img.onerror = () => {
+            imagesLoaded4++;
+            updateLoaderProgress();
+            if (imagesLoaded4 === FRAME_COUNT_4) {
+              resolve();
+            }
+          };
+          
+          frames4[i - 1] = img;
+        }
+      });
+    }
+
+    // Preload all frames for canvas-5
+    function preloadFrames5() {
+      return new Promise((resolve) => {
+        for (let i = 1; i <= FRAME_COUNT_5; i++) {
+          const img = new Image();
+          const frameNum = String(i).padStart(4, '0');
+          img.src = `${FRAME_PATH_5}${frameNum}${FRAME_EXT_5}`;
+          
+          img.onload = () => {
+            imagesLoaded5++;
+            updateLoaderProgress();
+            if (imagesLoaded5 === FRAME_COUNT_5) {
+              resolve();
+            }
+          };
+          
+          img.onerror = () => {
+            imagesLoaded5++;
+            updateLoaderProgress();
+            if (imagesLoaded5 === FRAME_COUNT_5) {
+              resolve();
+            }
+          };
+          
+          frames5[i - 1] = img;
+        }
+      });
+    }
+
+    // Preload all scene videos
     function preloadVideos() {
       return new Promise((resolve) => {
         let videosLoaded = 0;
-        const totalVideos = 3;
+        const totalVideos = 6;
         
         function checkComplete() {
           videosLoaded++;
@@ -442,41 +628,27 @@
           }
         }
         
-        // Scene-1 video
-        if (scene1Video.readyState >= 3) {
-          checkComplete();
-        } else {
-          scene1Video.addEventListener('canplaythrough', checkComplete, { once: true });
-          scene1Video.addEventListener('error', () => {
-            console.warn('Scene-1 video failed to load');
-            checkComplete();
-          }, { once: true });
-          scene1Video.load();
-        }
+        const videos = [
+          { video: scene1Video, name: 'Scene-1' },
+          { video: scene2Video, name: 'Scene-2' },
+          { video: scene3Video, name: 'Scene-3' },
+          { video: scene4Video, name: 'Scene-4' },
+          { video: scene5Video, name: 'Scene-5' },
+          { video: scene6Video, name: 'Scene-6' }
+        ];
         
-        // Scene-2 video
-        if (scene2Video.readyState >= 3) {
-          checkComplete();
-        } else {
-          scene2Video.addEventListener('canplaythrough', checkComplete, { once: true });
-          scene2Video.addEventListener('error', () => {
-            console.warn('Scene-2 video failed to load');
+        videos.forEach(({ video, name }) => {
+          if (video.readyState >= 3) {
             checkComplete();
-          }, { once: true });
-          scene2Video.load();
-        }
-        
-        // Scene-3 video
-        if (scene3Video.readyState >= 3) {
-          checkComplete();
-        } else {
-          scene3Video.addEventListener('canplaythrough', checkComplete, { once: true });
-          scene3Video.addEventListener('error', () => {
-            console.warn('Scene-3 video failed to load');
-            checkComplete();
-          }, { once: true });
-          scene3Video.load();
-        }
+          } else {
+            video.addEventListener('canplaythrough', checkComplete, { once: true });
+            video.addEventListener('error', () => {
+              console.warn(`${name} video failed to load`);
+              checkComplete();
+            }, { once: true });
+            video.load();
+          }
+        });
       });
     }
 
@@ -500,6 +672,36 @@
       }
     }
 
+    // Set canvas-3 size based on first frame
+    function setupCanvas3() {
+      const firstFrame = frames3[0];
+      if (firstFrame && firstFrame.naturalWidth) {
+        canvas3.width = firstFrame.naturalWidth;
+        canvas3.height = firstFrame.naturalHeight;
+        drawFrame3(0);
+      }
+    }
+
+    // Set canvas-4 size based on first frame
+    function setupCanvas4() {
+      const firstFrame = frames4[0];
+      if (firstFrame && firstFrame.naturalWidth) {
+        canvas4.width = firstFrame.naturalWidth;
+        canvas4.height = firstFrame.naturalHeight;
+        drawFrame4(0);
+      }
+    }
+
+    // Set canvas-5 size based on first frame
+    function setupCanvas5() {
+      const firstFrame = frames5[0];
+      if (firstFrame && firstFrame.naturalWidth) {
+        canvas5.width = firstFrame.naturalWidth;
+        canvas5.height = firstFrame.naturalHeight;
+        drawFrame5(0);
+      }
+    }
+
     // Draw a specific frame
     function drawFrame(index) {
       const frame = frames[index];
@@ -517,6 +719,36 @@
         ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
         ctx2.drawImage(frame, 0, 0);
         currentFrame2 = index;
+      }
+    }
+
+    // Draw a specific frame for canvas-3
+    function drawFrame3(index) {
+      const frame = frames3[index];
+      if (frame && frame.complete) {
+        ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
+        ctx3.drawImage(frame, 0, 0);
+        currentFrame3 = index;
+      }
+    }
+
+    // Draw a specific frame for canvas-4
+    function drawFrame4(index) {
+      const frame = frames4[index];
+      if (frame && frame.complete) {
+        ctx4.clearRect(0, 0, canvas4.width, canvas4.height);
+        ctx4.drawImage(frame, 0, 0);
+        currentFrame4 = index;
+      }
+    }
+
+    // Draw a specific frame for canvas-5
+    function drawFrame5(index) {
+      const frame = frames5[index];
+      if (frame && frame.complete) {
+        ctx5.clearRect(0, 0, canvas5.width, canvas5.height);
+        ctx5.drawImage(frame, 0, 0);
+        currentFrame5 = index;
       }
     }
 
@@ -542,6 +774,42 @@
         }
       }
       requestAnimationFrame(animate2);
+    }
+
+    // Smooth frame interpolation for canvas-3
+    function animate3() {
+      const diff = targetFrame3 - currentFrame3;
+      if (Math.abs(diff) > 0.5) {
+        const nextFrame = Math.round(currentFrame3 + diff * 0.15);
+        if (nextFrame !== currentFrame3 && nextFrame >= 0 && nextFrame < FRAME_COUNT_3) {
+          drawFrame3(nextFrame);
+        }
+      }
+      requestAnimationFrame(animate3);
+    }
+
+    // Smooth frame interpolation for canvas-4
+    function animate4() {
+      const diff = targetFrame4 - currentFrame4;
+      if (Math.abs(diff) > 0.5) {
+        const nextFrame = Math.round(currentFrame4 + diff * 0.15);
+        if (nextFrame !== currentFrame4 && nextFrame >= 0 && nextFrame < FRAME_COUNT_4) {
+          drawFrame4(nextFrame);
+        }
+      }
+      requestAnimationFrame(animate4);
+    }
+
+    // Smooth frame interpolation for canvas-5
+    function animate5() {
+      const diff = targetFrame5 - currentFrame5;
+      if (Math.abs(diff) > 0.5) {
+        const nextFrame = Math.round(currentFrame5 + diff * 0.15);
+        if (nextFrame !== currentFrame5 && nextFrame >= 0 && nextFrame < FRAME_COUNT_5) {
+          drawFrame5(nextFrame);
+        }
+      }
+      requestAnimationFrame(animate5);
     }
 
     // Initialize Lenis
@@ -594,7 +862,6 @@
           
           // Trigger scene-2 when we reach the last frame
           const isScrollingDown = scroll > lastScrollPosition;
-          lastScrollPosition = scroll;
           
           if (targetFrame >= FRAME_COUNT - 1 && !scene2Played && isScrollingDown) {
             setTimeout(() => {
@@ -612,7 +879,67 @@
           const sectionProgress2 = Math.max(0, Math.min(1, scrollInSection2 / sectionHeight2));
           
           targetFrame2 = Math.floor(sectionProgress2 * (FRAME_COUNT_2 - 1));
+          
+          // Trigger scene-4 when we reach the last frame of canvas-2
+          const isScrollingDown = scroll > lastScrollPosition;
+          if (targetFrame2 >= FRAME_COUNT_2 - 1 && !scene4Played && isScrollingDown) {
+            setTimeout(() => {
+              playScene4();
+            }, 100);
+          }
         }
+
+        // Handle canvas-3 scrolling
+        if (canvas3Section.offsetParent !== null) {
+          const sectionTop3 = canvas3Section.offsetTop;
+          const sectionHeight3 = canvas3Section.offsetHeight - window.innerHeight;
+          
+          const scrollInSection3 = scroll - sectionTop3;
+          const sectionProgress3 = Math.max(0, Math.min(1, scrollInSection3 / sectionHeight3));
+          
+          targetFrame3 = Math.floor(sectionProgress3 * (FRAME_COUNT_3 - 1));
+          
+          // Trigger scene-5 when we reach the last frame of canvas-3
+          const isScrollingDown = scroll > lastScrollPosition;
+          if (targetFrame3 >= FRAME_COUNT_3 - 1 && !scene5Played && isScrollingDown) {
+            setTimeout(() => {
+              playScene5();
+            }, 100);
+          }
+        }
+
+        // Handle canvas-4 scrolling
+        if (canvas4Section.offsetParent !== null) {
+          const sectionTop4 = canvas4Section.offsetTop;
+          const sectionHeight4 = canvas4Section.offsetHeight - window.innerHeight;
+          
+          const scrollInSection4 = scroll - sectionTop4;
+          const sectionProgress4 = Math.max(0, Math.min(1, scrollInSection4 / sectionHeight4));
+          
+          targetFrame4 = Math.floor(sectionProgress4 * (FRAME_COUNT_4 - 1));
+          
+          // Trigger scene-6 when we reach the last frame of canvas-4
+          const isScrollingDown = scroll > lastScrollPosition;
+          if (targetFrame4 >= FRAME_COUNT_4 - 1 && !scene6Played && isScrollingDown) {
+            setTimeout(() => {
+              playScene6();
+            }, 100);
+          }
+        }
+
+        // Handle canvas-5 scrolling
+        if (canvas5Section.offsetParent !== null) {
+          const sectionTop5 = canvas5Section.offsetTop;
+          const sectionHeight5 = canvas5Section.offsetHeight - window.innerHeight;
+          
+          const scrollInSection5 = scroll - sectionTop5;
+          const sectionProgress5 = Math.max(0, Math.min(1, scrollInSection5 / sectionHeight5));
+          
+          targetFrame5 = Math.floor(sectionProgress5 * (FRAME_COUNT_5 - 1));
+        }
+        
+        // Update last scroll position after all checks
+        lastScrollPosition = scroll;
       });
 
       requestAnimationFrame(raf);
@@ -629,25 +956,18 @@
       // Play video
       scene1Video.play();
       
-      // iOS FIX: Warm up scene-2 and scene-3 videos during user interaction context
-      scene2Video.muted = true;
-      scene2Video.play().then(() => {
-        scene2Video.pause();
-        scene2Video.currentTime = 0;
-        scene2Video.muted = false;
-        console.log('Scene-2 video warmed up for iOS');
-      }).catch(e => {
-        console.log('Scene-2 warmup note:', e.message);
-      });
-      
-      scene3Video.muted = true;
-      scene3Video.play().then(() => {
-        scene3Video.pause();
-        scene3Video.currentTime = 0;
-        scene3Video.muted = false;
-        console.log('Scene-3 video warmed up for iOS');
-      }).catch(e => {
-        console.log('Scene-3 warmup note:', e.message);
+      // iOS FIX: Warm up all videos during user interaction context
+      const videosToWarm = [scene2Video, scene3Video, scene4Video, scene5Video, scene6Video];
+      videosToWarm.forEach((video, index) => {
+        video.muted = true;
+        video.play().then(() => {
+          video.pause();
+          video.currentTime = 0;
+          video.muted = false;
+          console.log(`Scene-${index + 2} video warmed up for iOS`);
+        }).catch(e => {
+          console.log(`Scene-${index + 2} warmup note:`, e.message);
+        });
       });
       
       // When video ends, enable scrolling and scroll to frames
@@ -731,6 +1051,120 @@
       }, { once: true });
     }
 
+    // Play scene-4 video
+    function playScene4() {
+      if (scene4Played) return;
+      scene4Played = true;
+      
+      // Disable scrolling during scene-4
+      document.body.classList.add('no-scroll');
+      
+      // Hide canvas-2 section immediately
+      canvas2Section.style.display = 'none';
+      
+      // Show and scroll to scene-4 section
+      scene4Section.style.display = 'flex';
+      window.scrollTo(0, scene4Section.offsetTop);
+      
+      // Play scene-4 video
+      scene4Video.play();
+      
+      // When scene-4 ends, enable scrolling and show canvas-3
+      scene4Video.addEventListener('ended', () => {
+        // Enable scrolling immediately
+        document.body.classList.remove('no-scroll');
+        
+        // Hide scene-4 section instantly
+        scene4Section.style.display = 'none';
+        
+        // Make sure we're showing the first frame of canvas-3
+        drawFrame3(0);
+        
+        // Show canvas-3 section
+        canvas3Section.style.display = 'block';
+        
+        // Scroll to canvas-3 section instantly
+        window.scrollTo(0, canvas3Section.offsetTop);
+        maxScrollReached = canvas3Section.offsetTop;
+      }, { once: true });
+    }
+
+    // Play scene-5 video
+    function playScene5() {
+      if (scene5Played) return;
+      scene5Played = true;
+      
+      // Disable scrolling during scene-5
+      document.body.classList.add('no-scroll');
+      
+      // Hide canvas-3 section immediately
+      canvas3Section.style.display = 'none';
+      
+      // Show and scroll to scene-5 section
+      scene5Section.style.display = 'flex';
+      window.scrollTo(0, scene5Section.offsetTop);
+      
+      // Play scene-5 video
+      scene5Video.play();
+      
+      // When scene-5 ends, enable scrolling and show canvas-4
+      scene5Video.addEventListener('ended', () => {
+        // Enable scrolling immediately
+        document.body.classList.remove('no-scroll');
+        
+        // Hide scene-5 section instantly
+        scene5Section.style.display = 'none';
+        
+        // Make sure we're showing the first frame of canvas-4
+        drawFrame4(0);
+        
+        // Show canvas-4 section
+        canvas4Section.style.display = 'block';
+        
+        // Scroll to canvas-4 section instantly
+        window.scrollTo(0, canvas4Section.offsetTop);
+        maxScrollReached = canvas4Section.offsetTop;
+      }, { once: true });
+    }
+
+    // Play scene-6 video
+    function playScene6() {
+      if (scene6Played) return;
+      scene6Played = true;
+      
+      // Disable scrolling during scene-6
+      document.body.classList.add('no-scroll');
+      
+      // Hide canvas-4 section immediately
+      canvas4Section.style.display = 'none';
+      
+      // Show and scroll to scene-6 section
+      scene6Section.style.display = 'flex';
+      window.scrollTo(0, scene6Section.offsetTop);
+      
+      // Play scene-6 video
+      scene6Video.play();
+      
+      // When scene-6 ends, enable scrolling and show canvas-5
+      scene6Video.addEventListener('ended', () => {
+        // Enable scrolling immediately
+        document.body.classList.remove('no-scroll');
+        
+        // Hide scene-6 section instantly
+        scene6Section.style.display = 'none';
+        
+        // Make sure we're showing the first frame of canvas-5
+        drawFrame5(0);
+        
+        // Show canvas-5 section
+        canvas5Section.style.display = 'block';
+        
+        // Scroll to canvas-5 section instantly
+        window.scrollTo(0, canvas5Section.offsetTop);
+        maxScrollReached = canvas5Section.offsetTop;
+      }, { once: true });
+    }
+
     // Setup scene-1 interactions
     function setupScene1() {
       scene1Section.addEventListener('click', handleScene1Tap);
@@ -754,20 +1188,38 @@
       scene2Played = false;
       maxScrollReached = 0;
       
-      // Reset canvas-1, canvas-2, scene-2 and scene-3 sections
+      // Reset all sections
       canvas1Section.style.display = 'block';
       canvas2Section.style.display = 'none';
+      canvas3Section.style.display = 'none';
+      canvas4Section.style.display = 'none';
+      canvas5Section.style.display = 'none';
       scene2Section.style.display = 'none';
       scene2Video.currentTime = 0;
       scene3Section.style.display = 'none';
       scene3Video.currentTime = 0;
+      scene4Section.style.display = 'none';
+      scene4Video.currentTime = 0;
+      scene5Section.style.display = 'none';
+      scene5Video.currentTime = 0;
+      scene6Section.style.display = 'none';
+      scene6Video.currentTime = 0;
       
       // Preload videos first, then frames
       await preloadVideos();
-      await Promise.all([preloadFrames(), preloadFrames2()]);
+      await Promise.all([
+        preloadFrames(),
+        preloadFrames2(),
+        preloadFrames3(),
+        preloadFrames4(),
+        preloadFrames5()
+      ]);
       
       setupCanvas();
       setupCanvas2();
+      setupCanvas3();
+      setupCanvas4();
+      setupCanvas5();
       setupScene1();
       
       // Hide loader
@@ -776,6 +1228,9 @@
       // Start frame animation loops
       animate();
       animate2();
+      animate3();
+      animate4();
+      animate5();
     }
 
     init();
