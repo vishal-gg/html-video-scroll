@@ -1446,15 +1446,11 @@
 
     // Setup scene-1 interactions
     function setupScene1() {
-      scene1Section.addEventListener('click', handleScene1Tap);
-      scene1Section.addEventListener('touchend', handleScene1Tap);
-      scene1Section.addEventListener('touchmove', handleScene1Tap);
-      
-      tapOverlay.addEventListener('touchmove', handleScene1Tap);
-      scene1Section.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        handleScene1Tap();
-      });
+      scene1Section.addEventListener('click', handleScene1Tap);      
+      // scene1Section.addEventListener('touchend', (e) => {
+      //   e.preventDefault();
+      //   handleScene1Tap();
+      // });
     }
 
     // Update canvas progress indicator
