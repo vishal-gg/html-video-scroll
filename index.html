@@ -1203,51 +1203,33 @@
     // Handle scene-1 video tap/click
     function handleScene1Tap() {
       if (scene1Played) return;
+      scene1Played = true;
       
-      // Try to play video first - only proceed if successful
-      const playPromise = scene1Video.play();
+      // Hide overlay
+      tapOverlay.classList.add('hidden');
       
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          // Video started playing successfully
-          scene1Played = true;
-          
-          // Hide overlay only after video starts
-          tapOverlay.classList.add('hidden');
-          
-          // Show menu-wrap
-          const menuWrap = document.querySelector('.menu-wrap');
-          if (menuWrap) {
-            menuWrap.style.display = 'flex';
-          }
-          
-          // iOS FIX: Warm up all videos during user interaction context
-          const videosToWarm = [scene2Video, scene3Video, scene4Video, scene5Video, scene6Video];
-          videosToWarm.forEach((video, index) => {
-            video.muted = true;
-            video.play().then(() => {
-              video.pause();
-              video.currentTime = 0;
-              video.muted = false;
-              console.log(`Scene-${index + 2} video warmed up for iOS`);
-            }).catch(e => {
-              console.log(`Scene-${index + 2} warmup note:`, e.message);
-            });
-          });
-        }).catch((error) => {
-          // Video failed to play - don't hide overlay, user needs to tap again
-          console.log('Video play failed, waiting for user interaction:', error.message);
-        });
-      } else {
-        // Fallback for older browsers
-        scene1Played = true;
-        tapOverlay.classList.add('hidden');
-        
-        const menuWrap = document.querySelector('.menu-wrap');
-        if (menuWrap) {
-          menuWrap.style.display = 'flex';
-        }
+      // Show menu-wrap
+      const menuWrap = document.querySelector('.menu-wrap');
+      if (menuWrap) {
+        menuWrap.style.display = 'flex';
       }
+      
+      // Play video
+      scene1Video.play();
+      
+      // iOS FIX: Warm up all videos during user interaction context
+      const videosToWarm = [scene2Video, scene3Video, scene4Video, scene5Video, scene6Video];
+      videosToWarm.forEach((video, index) => {
+        video.muted = true;
+        video.play().then(() => {
+          video.pause();
+          video.currentTime = 0;
+          video.muted = false;
+          console.log(`Scene-${index + 2} video warmed up for iOS`);
+        }).catch(e => {
+          console.log(`Scene-${index + 2} warmup note:`, e.message);
+        });
+      });
       
       // When video ends, enable scrolling and scroll to frames
       scene1Video.addEventListener('ended', () => {
@@ -1464,36 +1446,11 @@
 
     // Setup scene-1 interactions
     function setupScene1() {
-      // Only respond to actual click/tap, not scroll events
-      scene1Section.addEventListener('click', (e) => {
-        // Prevent if it was a scroll gesture
-        if (e.target === scene1Section || tapOverlay.contains(e.target) || e.target === scene1Video) {
-          handleScene1Tap();
-        }
-      });
-      
+      scene1Section.addEventListener('click', handleScene1Tap);
       scene1Section.addEventListener('touchend', (e) => {
         e.preventDefault();
-        // Only handle if it's a tap, not a scroll gesture
-        if (e.target === scene1Section || tapOverlay.contains(e.target) || e.target === scene1Video) {
-          handleScene1Tap();
-        }
+        handleScene1Tap();
       });
-      
-      // Prevent any scroll events from triggering before tap
-      scene1Section.addEventListener('wheel', (e) => {
-        if (!scene1Played) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }, { passive: false });
-      
-      scene1Section.addEventListener('touchmove', (e) => {
-        if (!scene1Played) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }, { passive: false });
     }
 
     // Update canvas progress indicator
