@@ -1447,6 +1447,8 @@
     // Setup scene-1 interactions
     function setupScene1() {
       scene1Section.addEventListener('click', handleScene1Tap);
+      scene1Section.addEventListener('touchstart', handleScene1Tap);
+      tapOverlay.addEventListener('touchstart', handleScene1Tap);
       scene1Section.addEventListener('touchend', (e) => {
         e.preventDefault();
         handleScene1Tap();
