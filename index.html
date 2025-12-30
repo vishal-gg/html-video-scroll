@@ -576,7 +576,7 @@
     // Configuration
     const FRAME_COUNT = 28;
     const FRAME_PATH = 'frames/frame_';
-    const FRAME_EXT = '.webp';
+    const FRAME_EXT = '.jpg';
     
     const FRAME_COUNT_2 = 593;
     const FRAME_PATH_2 = 'frames-2/frame_';
@@ -584,15 +584,15 @@
     
     const FRAME_COUNT_3 = 32;
     const FRAME_PATH_3 = 'frames-3/frame_';
-    const FRAME_EXT_3 = '.webp';
+    const FRAME_EXT_3 = '.jpg';
     
     const FRAME_COUNT_4 = 47;
     const FRAME_PATH_4 = 'frames-4/frame_';
-    const FRAME_EXT_4 = '.webp';
+    const FRAME_EXT_4 = '.jpg';
     
     const FRAME_COUNT_5 = 70;
     const FRAME_PATH_5 = 'frames-5/frame_';
-    const FRAME_EXT_5 = '.webp';
+    const FRAME_EXT_5 = '.jpg';
 
     // Elements
     const canvas = document.getElementById('frame-canvas');
@@ -672,27 +672,6 @@
     let maxScrollReached = 0;
     let isCorrectingScroll = false;
 
-    // Audio elements for frame sounds
-    const frameSound1 = new Audio('sfx/scroll-1.mp3');
-    const frameSound2 = new Audio('sfx/scroll-2.mp3');
-    const frameSound3 = new Audio('sfx/scroll-3.mp3');
-    const frameSound4 = new Audio('sfx/scroll-4.mp3');
-    const frameSound5 = new Audio('sfx/scroll-5.mp3');
-
-    // Frame thresholds for playing sounds
-    const SOUND_FRAME_THRESHOLD_1 = 14;
-    const SOUND_FRAME_THRESHOLD_2 = 15;
-    const SOUND_FRAME_THRESHOLD_3 = 14;
-    const SOUND_FRAME_THRESHOLD_4 = 14;
-    const SOUND_FRAME_THRESHOLD_5 = 14;
-
-    // Track if sound has been played for each animation
-    let soundPlayedAtFrame = false;
-    let soundPlayedAtFrame_2 = false;
-    let soundPlayedAtFrame_3 = false;
-    let soundPlayedAtFrame_4 = false;
-    let soundPlayedAtFrame_5 = false;
-
     // Preload all frames
     function preloadFrames() {
       return new Promise((resolve) => {
@@ -724,15 +703,12 @@
 
     // Track last blur update to throttle for smooth transitions
     let lastBlurProgress = -1;
-    let initialLoadingComplete = false;
     
-    // Update loader progress (only for initial resources)
+    // Update loader progress
     function updateLoaderProgress() {
-      if (initialLoadingComplete) return; // Don't update after initial load is complete
-      
-      const totalInitialFrames = FRAME_COUNT + FRAME_COUNT_2; // Count initial frames and frames-2
-      const loadedInitialFrames = imagesLoaded + imagesLoaded2;
-      const frameProgress = (loadedInitialFrames / totalInitialFrames) * 90;
+      const totalFrames = FRAME_COUNT + FRAME_COUNT_2 + FRAME_COUNT_3 + FRAME_COUNT_4 + FRAME_COUNT_5;
+      const loadedFrames = imagesLoaded + imagesLoaded2 + imagesLoaded3 + imagesLoaded4 + imagesLoaded5;
+      const frameProgress = (loadedFrames / totalFrames) * 90;
       const totalProgress = 10 + frameProgress;
       loaderFill.style.width = `${totalProgress}%`;
       loaderPercentage.textContent = `${Math.round(totalProgress)}%`;
@@ -785,6 +761,7 @@
           
           img.onload = () => {
             imagesLoaded3++;
+            updateLoaderProgress();
             if (imagesLoaded3 === FRAME_COUNT_3) {
               resolve();
             }
@@ -792,6 +769,7 @@
           
           img.onerror = () => {
             imagesLoaded3++;
+            updateLoaderProgress();
             if (imagesLoaded3 === FRAME_COUNT_3) {
               resolve();
             }
@@ -812,6 +790,7 @@
           
           img.onload = () => {
             imagesLoaded4++;
+            updateLoaderProgress();
             if (imagesLoaded4 === FRAME_COUNT_4) {
               resolve();
             }
@@ -819,6 +798,7 @@
           
           img.onerror = () => {
             imagesLoaded4++;
+            updateLoaderProgress();
             if (imagesLoaded4 === FRAME_COUNT_4) {
               resolve();
             }
@@ -839,6 +819,7 @@
           
           img.onload = () => {
             imagesLoaded5++;
+            updateLoaderProgress();
             if (imagesLoaded5 === FRAME_COUNT_5) {
               resolve();
             }
@@ -846,6 +827,7 @@
           
           img.onerror = () => {
             imagesLoaded5++;
+            updateLoaderProgress();
             if (imagesLoaded5 === FRAME_COUNT_5) {
               resolve();
             }
@@ -856,11 +838,11 @@
       });
     }
 
-    // Preload initial scene videos (scene-1, scene-2, scene-3)
-    function preloadInitialVideos() {
+    // Preload all scene videos
+    function preloadVideos() {
       return new Promise((resolve) => {
         let videosLoaded = 0;
-        const totalVideos = 3;
+        const totalVideos = 6;
         
         function checkComplete() {
           videosLoaded++;
@@ -876,38 +858,7 @@
         const videos = [
           { video: scene1Video, name: 'Scene-1' },
           { video: scene2Video, name: 'Scene-2' },
-          { video: scene3Video, name: 'Scene-3' }
-        ];
-        
-        videos.forEach(({ video, name }) => {
-          if (video.readyState >= 3) {
-            checkComplete();
-          } else {
-            video.addEventListener('canplaythrough', checkComplete, { once: true });
-            video.addEventListener('error', () => {
-              console.warn(`${name} video failed to load`);
-              checkComplete();
-            }, { once: true });
-            video.load();
-          }
-        });
-      });
-    }
-
-    // Preload remaining scene videos in background (scene-4, scene-5, scene-6)
-    function preloadRemainingVideos() {
-      return new Promise((resolve) => {
-        let videosLoaded = 0;
-        const totalVideos = 3;
-        
-        function checkComplete() {
-          videosLoaded++;
-          if (videosLoaded === totalVideos) {
-            resolve();
-          }
-        }
-        
-        const videos = [
+          { video: scene3Video, name: 'Scene-3' },
           { video: scene4Video, name: 'Scene-4' },
           { video: scene5Video, name: 'Scene-5' },
           { video: scene6Video, name: 'Scene-6' }
@@ -985,13 +936,6 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(frame, 0, 0);
         currentFrame = index;
-        
-        // Play sound when threshold frame is reached
-        if (index >= SOUND_FRAME_THRESHOLD_1 && !soundPlayedAtFrame) {
-          soundPlayedAtFrame = true;
-          frameSound1.currentTime = 0;
-          frameSound1.play().catch(err => console.log('Audio play failed:', err));
-        }
       }
     }
 
@@ -1002,13 +946,6 @@
         ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
         ctx2.drawImage(frame, 0, 0);
         currentFrame2 = index;
-        
-        // Play sound when threshold frame is reached
-        if (index >= SOUND_FRAME_THRESHOLD_2 && !soundPlayedAtFrame_2) {
-          soundPlayedAtFrame_2 = true;
-          frameSound2.currentTime = 0;
-          frameSound2.play().catch(err => console.log('Audio play failed:', err));
-        }
       }
     }
 
@@ -1019,13 +956,6 @@
         ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
         ctx3.drawImage(frame, 0, 0);
         currentFrame3 = index;
-        
-        // Play sound when threshold frame is reached
-        if (index >= SOUND_FRAME_THRESHOLD_3 && !soundPlayedAtFrame_3) {
-          soundPlayedAtFrame_3 = true;
-          frameSound3.currentTime = 0;
-          frameSound3.play().catch(err => console.log('Audio play failed:', err));
-        }
       }
     }
 
@@ -1036,13 +966,6 @@
         ctx4.clearRect(0, 0, canvas4.width, canvas4.height);
         ctx4.drawImage(frame, 0, 0);
         currentFrame4 = index;
-        
-        // Play sound when threshold frame is reached
-        if (index >= SOUND_FRAME_THRESHOLD_4 && !soundPlayedAtFrame_4) {
-          soundPlayedAtFrame_4 = true;
-          frameSound4.currentTime = 0;
-          frameSound4.play().catch(err => console.log('Audio play failed:', err));
-        }
       }
     }
 
@@ -1053,13 +976,6 @@
         ctx5.clearRect(0, 0, canvas5.width, canvas5.height);
         ctx5.drawImage(frame, 0, 0);
         currentFrame5 = index;
-        
-        // Play sound when threshold frame is reached
-        if (index >= SOUND_FRAME_THRESHOLD_5 && !soundPlayedAtFrame_5) {
-          soundPlayedAtFrame_5 = true;
-          frameSound5.currentTime = 0;
-          frameSound5.play().catch(err => console.log('Audio play failed:', err));
-        }
       }
     }
 
@@ -1655,13 +1571,6 @@
       scene5Played = false;
       scene6Played = false;
       
-      // Reset sound flags so sounds can play again when navigating from menu
-      soundPlayedAtFrame = false;
-      soundPlayedAtFrame_2 = false;
-      soundPlayedAtFrame_3 = false;
-      soundPlayedAtFrame_4 = false;
-      soundPlayedAtFrame_5 = false;
-      
       // Ensure Lenis is initialized
       if (!lenis) {
         initLenis();
@@ -1890,24 +1799,6 @@
       }
     }
 
-    // Load remaining resources in background
-    async function loadRemainingResources() {
-      // Load remaining videos and frames in background
-      await Promise.all([
-        preloadRemainingVideos(),
-        preloadFrames3(),
-        preloadFrames4(),
-        preloadFrames5()
-      ]);
-      
-      // Setup canvases for remaining frames once loaded
-      setupCanvas3();
-      setupCanvas4();
-      setupCanvas5();
-      
-      console.log('Background loading complete');
-    }
-
     // Initialize
     async function init() {
       // Force scroll to top on page load
@@ -1921,13 +1812,6 @@
       scene1Played = false;
       scene2Played = false;
       maxScrollReached = 0;
-      
-      // Reset sound flags
-      soundPlayedAtFrame = false;
-      soundPlayedAtFrame_2 = false;
-      soundPlayedAtFrame_3 = false;
-      soundPlayedAtFrame_4 = false;
-      soundPlayedAtFrame_5 = false;
       
       // Reset all sections
       canvas1Section.style.display = 'block';
@@ -1946,19 +1830,21 @@
       scene6Section.style.display = 'none';
       scene6Video.currentTime = 0;
       
-      // Preload initial videos (scene-1, scene-2, scene-3) and frames (frames and frames-2 directories)
-      await preloadInitialVideos();
+      // Preload videos first, then frames
+      await preloadVideos();
       await Promise.all([
         preloadFrames(),
-        preloadFrames2()
+        preloadFrames2(),
+        preloadFrames3(),
+        preloadFrames4(),
+        preloadFrames5()
       ]);
       
-      // Mark initial loading as complete
-      initialLoadingComplete = true;
-      
-      // Setup initial canvases
       setupCanvas();
       setupCanvas2();
+      setupCanvas3();
+      setupCanvas4();
+      setupCanvas5();
       setupScene1();
       setupMenuNavigation();
       setupRewindButton();
@@ -1969,15 +1855,12 @@
       // Hide loader
       loader.classList.add('hidden');
       
-      // Start frame animation loops (only animate will work initially, others will start when frames load)
+      // Start frame animation loops
       animate();
       animate2();
       animate3();
       animate4();
       animate5();
-      
-      // Start loading remaining resources in background
-      loadRemainingResources();
     }
 
     init();
